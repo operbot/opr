@@ -12,7 +12,7 @@ from .cls import Class
 from .jsn import hook
 from .sel import Selector
 from .wdr import Wd
-from .utl import fns, fntime
+from .utl import elapsed, fns, fntime
 
 
 dblock = _thread.allocate_lock()
@@ -94,6 +94,18 @@ class Db():
         if res:
             return res[-1]
         return (None, None)
+
+
+def all(name, timed=None):
+    names = Class.full(name)
+    if not names:
+        names = Wd.types(name)
+    result = []
+    dbs = Db()
+    for nme in names:
+        for fnm, obj in dbs.all(nme, timed):
+            result.append((fnm, obj))
+    return result
 
 
 def find(name, selector=None, index=None, timed=None):

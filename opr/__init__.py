@@ -14,7 +14,7 @@ from .thr import Thread, launch
 from .tmr import Timer, Repeater
 from .utl import wait
 from .cls import Class
-from .dbs import Db, find, fns, fntime, hook, last, locked
+from .dbs import Db, all, find, fns, fntime, hook, last, locked
 from .dft import Default
 from .jsn import ObjectDecoder, ObjectEncoder, dump, dumps, load, loads, save
 from .obj import *
@@ -41,6 +41,7 @@ def __dir__():
             'Thread',
             'Timer',
             'Wd',
+            'all',
             'dispatch',
             'delete',
             'dump',

@@ -16,8 +16,8 @@ import time
 sys.path.insert(0, os.getcwd())
 
 
-from opr import Client, Event, Wd, keys, printable, update
-from opr import parse, scan, wait
+from opr import Client, Command, Db, Event, Object, Wd, keys, printable, update
+from opr import all, parse, scan, wait, cdir, elapsed, fntime
 from opr.irc import Config, IRC
 from opr.rss import Fetcher
 from opr.run import Cfg, docmd
@@ -86,24 +86,22 @@ def daemon():
     os.dup2(ses.fileno(), sys.stderr.fileno())
 
 
-def fnd():
-    if len(sys.argv) == 1:
-        print("opdb workdir [type] [selector]")
+def fnd(event):
+    if len(event.args) == 0:
+        print("opr fnd workdir [type] [selector]")
         return
-    Wd.workdir = sys.argv[1]
-    cdir(Wd.storedir())
-    if len(sys.argv) < 3:
+    if len(event.args) == 1:
+        Wd.workdir = event.args[0]
         res = ",".join({x.split(".")[-1].lower() for x in Wd.types()})
         if res:
             print(res)
         else:
             print("no types yet.")
         return
-    otype = sys.argv[2]
-    gets = Object()
-    if len(sys.argv) > 3:
-         update(gets, [x.split("==") for x in sys.argv[1:]])
-    res = list(find(otype, gets))
+    Wd.workdir = event.args[0]
+    otype = event.args[1]
+    dbs = Db()
+    res = list(all(otype))
     _nr = 0
     for _fn, obj in res:
         txt = "%s %s %s" % (
