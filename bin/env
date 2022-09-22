@@ -1,0 +1,22 @@
+#!/usr/bin/env python3
+# This file is placed in the Public Domain.
+# pylint: disable=C0115,C0116
+
+
+"create env"
+
+
+import os
+
+
+def popen(txt):
+    for line in os.popen(txt).readlines():
+        print(line.rstrip())
+
+
+
+popen("rm -fR ~/.cache/pip")
+popen("bin/clean")
+popen("python3 setup.py sdist")
+popen("python3 -mvirtualenv --no-download env")
+popen("env/bin/pip3 install oper -f dist --force-reinstall --no-deps")

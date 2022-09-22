@@ -1,0 +1,52 @@
+#!/usr/bin/env python3
+# This file is placed in the Public Domain.
+
+
+"check for blurp"
+
+import os
+
+
+ALL = [
+       "__import__",
+       "__main__",
+       "__version__",
+       '"## "',
+       "popen",
+       "pkgutil",
+       "importlib",
+       "print",
+       "sys",
+       "inspect",
+       "traceback"
+      ]
+
+
+SKIP = [
+        ".git",
+        "README",
+        "dev",
+        "grep",
+        "mod",
+        "docs"
+       ]
+
+
+TXT  = "grep -R %s"
+
+
+def main():
+    for txt in ALL:
+        greptxt = TXT % txt
+        for line in os.popen(greptxt).readlines():
+            donext = False
+            for skip in SKIP:
+                if skip in line:
+                    donext = True
+                    break
+            if donext:
+                continue
+            print(line.rstrip())
+
+
+main()

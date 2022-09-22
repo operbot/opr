@@ -1,0 +1,34 @@
+#!/usr/bin/env python3
+# This file is placed in the Public Domain.
+
+
+import os
+import sys
+
+
+SKIP="."
+
+def popen(txt):
+    for line in os.popen(txt).readlines():
+        lne = line.strip()
+        if lne:
+            print(lne)
+
+
+def main():
+    for fnn in os.listdir(os.getcwd()):
+        if not os.path.isdir(fnn):
+            continue
+        next = False
+        for skp in SKIP:
+            if skp in fnn:
+                next = True
+                continue
+        if next:
+            continue
+        print("chdir into %s" % fnn)
+        os.chdir(fnn)
+        popen(" ".join(sys.argv[1:]))
+        os.chdir("..")
+
+main()

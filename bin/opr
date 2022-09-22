@@ -1,0 +1,179 @@
+#!/usr/bin/env python3
+# This file is placed in the Public Domain.
+
+
+"object programming runtime"
+
+
+import os
+import readline
+import signal
+import sys
+import termios
+import time
+
+
+sys.path.insert(0, os.getcwd())
+
+
+from opr import Client, Event, Wd, keys, printable, update
+from opr import parse, scan, wait
+from opr.irc import Config, IRC
+from opr.rss import Fetcher
+from opr.run import Cfg, docmd
+from opr import cmd, irc, rss
+
+
+Wd.workdir = os.path.expanduser("~/.opr")
+
+
+Config.nick = "opr"
+Config.channel = "#opr"
+Config.realname = "object programming runtime"
+Config.username = "opr"
+
+
+scan(cmd)
+scan(irc)
+scan(rss)
+
+
+class CLI(Client):
+
+    @staticmethod
+    def raw(txt):
+        print(txt)
+
+
+class Console(CLI):
+
+    @staticmethod
+    def announce(txt):
+        pass
+
+    @staticmethod
+    def handle(event):
+        Client.handle(event)
+        event.wait()
+
+    def poll(self):
+        event = Event()
+        event.txt = input("> ")
+        event.orig = repr(self)
+        return event
+
+
+def banner(cfg):
+    print(
+          "OPR started at %s %s" % (
+                                     time.ctime(time.time()).replace("  ", " "),
+                                     printable(cfg, "debug,verbose")
+                                    )
+         )
+
+
+def daemon():
+    pid = os.fork()
+    if pid != 0:
+        os._exit(0)
+    os.setsid()
+    os.umask(0)
+    sis = open("/dev/null", 'r')
+    sos = open("/dev/null", 'a+')
+    ses = open("/dev/null", 'a+')
+    os.dup2(sis.fileno(), sys.stdin.fileno())
+    os.dup2(sos.fileno(), sys.stdout.fileno())
+    os.dup2(ses.fileno(), sys.stderr.fileno())
+
+
+def fnd():
+    if len(sys.argv) == 1:
+        print("opdb workdir [type] [selector]")
+        return
+    Wd.workdir = sys.argv[1]
+    cdir(Wd.storedir())
+    if len(sys.argv) < 3:
+        res = ",".join({x.split(".")[-1].lower() for x in Wd.types()})
+        if res:
+            print(res)
+        else:
+            print("no types yet.")
+        return
+    otype = sys.argv[2]
+    gets = Object()
+    if len(sys.argv) > 3:
+         update(gets, [x.split("==") for x in sys.argv[1:]])
+    res = list(find(otype, gets))
+    _nr = 0
+    for _fn, obj in res:
+        txt = "%s %s %s" % (
+                            str(_nr),
+                            printable(obj, keys(obj)),
+                            elapsed(time.time()-fntime(_fn))
+                           )
+        _nr += 1
+        print(txt)
+    if not _nr:
+        print("no result")
+
+
+def hup(_sig, _frame):
+    print("signal 15 called")
+    sys.stdout.flush()
+
+
+def isopt(ostr):
+    for opt in ostr:
+        if opt in Cfg.opts:
+            return True
+    return False
+
+
+def wrap(func):
+    fds = sys.stdin.fileno()
+    gotterm = True
+    try:
+        old = termios.tcgetattr(fds)
+    except termios.error:
+        gotterm = False
+    readline.redisplay()
+    try:
+        func()
+    except (EOFError, KeyboardInterrupt):
+        print("")
+    finally:
+        if gotterm:
+            termios.tcsetattr(fds, termios.TCSADRAIN, old)
+
+
+def main():
+    signal.signal(signal.SIGHUP, hup)
+    txt = ' '.join(sys.argv[1:])
+    cfg = parse(txt)
+    update(Cfg, cfg)
+    if cfg.txt:
+        Command.add(fnd)
+        cli = CLI()
+        docmd(cli, cfg.otxt)
+        return
+    if isopt("d"):
+        daemon()
+    if isopt("ci"):
+        banner(cfg)
+    if isopt("di"):
+        bot = IRC()
+        bot.start()
+        if isopt("v"):
+            print(printable(bot.cfg, "nick,channel,server,port,sasl"))
+    if isopt("r"):
+        fetcher = Fetcher()
+        fetcher.start()
+    if isopt("ci") and not isopt("d"):
+        csl = Console()
+        csl.start()
+        csl.forever()
+    if isopt("d"):
+        wait()
+        
+
+wrap(main)

@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+
+
+import os
+import sys
+
+
+os.environ["PYTHONPATH"] = "."
+
+
+SKIP = ["Your code", "---"]
+
+
+def popen(txt):
+    for line in os.popen(txt).readlines():
+        doskip = False
+        for skip in SKIP:
+            if skip in line:
+                doskip = True
+        if doskip:
+            continue
+        res = line.rstrip()
+        if res:
+            print(res)
+
+
+popen("pylint op")
+popen("pylint opr")
+popen("pylint oper")
