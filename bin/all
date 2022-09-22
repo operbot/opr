@@ -1,0 +1,26 @@
+#!/usr/bin/env python3
+# This file is placed in the Public Domain
+
+
+"build all"
+
+
+import os
+
+
+SILENT = 1
+
+
+def popen(txt):
+    for line in os.popen(txt).readlines():
+        if not SILENT:
+            print(line.rstrip())
+
+
+popen("bin/wipe")
+popen("bin/check")
+popen("bin/build")
+popen("bin/lint")
+popen("bin/test")
+popen("bin/tinder")
+popen("bin/env")

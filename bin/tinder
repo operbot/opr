@@ -18,10 +18,9 @@ import traceback
 sys.path.insert(0, os.getcwd())
 
 
-from op import Object, Wd,  elapsed, get, keys, name, printable
-from oper import Cfg, Client, Commands, Event, parse, scandir, scan
-from oper.trc import from_exception
-
+from opr import Object, Wd,  elapsed, get, keys, name, printable
+from opr import Client, Command, Event, parse, scandir, scan
+from opr.run import Cfg
 
 Cfg.debug = True
 Cfg.threaded = False
@@ -93,7 +92,7 @@ def importer(packagename, modulename):
 
 
 def payload(cli):
-    cmds = sorted(Commands.cmds)
+    cmds = sorted(Command.cmd)
     _nr = 0
     for cmd in cmds:
         for ex in get(param, cmd, [""]):
@@ -143,7 +142,7 @@ def main():
         for thr in thrs:
             res += thr.join()
     else:
-        res = nrs * len(Commands.cmds)
+        res = nrs * len(Command.cmd)
     if not res:
         res = 1
     consume(events)

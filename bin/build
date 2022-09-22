@@ -2,7 +2,7 @@
 # This file is placed in the Public Domain.
 
 
-"clear all"
+"build distribution"
 
 
 import os
@@ -13,6 +13,4 @@ def popen(txt):
         print(line.rstrip())
 
 
-popen("bin/clean")
-popen("rm -fR ~/.cache/pip/")
-popen("rm -fR env html")
+popen("python3 setup.py sdist bdist_wheel")
