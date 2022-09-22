@@ -1,6 +1,9 @@
 # This file is placed in the Public Domain.
 
 
+"object programming runtime"
+
+
 from setuptools import setup
 
 
@@ -9,16 +12,16 @@ def read():
 
 
 setup(
-    name="oper",
+    name="opr",
     version="1",
     author="Bart Thate",
     author_email="operbot100@gmail.com",
     url="http://github.com/operbot/oper",
-    description="operator bot",
+    description="object programming runtime",
     long_description=read(),
     license="Public Domain",
-    packages=["op", "opr"],
-    scripts=["bin/op", "bin/oper"],
+    packages=["opr"],
+    scripts=["bin/opr"],
     classifiers=[
         "Development Status :: 4 - Beta",
         "License :: Public Domain",

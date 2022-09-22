@@ -3,7 +3,7 @@ README
 
 **NAME**
 
-``oper`` - write your own commands.
+``opr`` - write your own commands.
 
 
 **SYNOPSIS**
@@ -15,7 +15,7 @@ README
 
 **DESCRIPTION**
 
-``oper`` is a solid, non hackable bot, intended to be programmable in a
+``opr`` is a solid, non hackable bot, intended to be programmable in a
 static, only code, no popen, fixed imports and no reading modules from a
 directory, to not have a directory to read modules from to add
 commands to the bot but include the own programmed modules directly into the
@@ -24,13 +24,13 @@ runable. Reading random code from a directory is what gets avoided. As
 experience tells os.popen and __import__, importlib are also avoided, direct
 imports in the code is what is used.
 
-``oper`` stores it's data on disk where objects are time versioned and the
+``opr`` stores it's data on disk where objects are time versioned and the
 last version saved on disk is served to the user layer. Files are JSON dumps
 that are read-only so thus should provide (disk) persistence. Paths carry the
 type in the path name what makes reconstruction from filename easier then
 reading type from the object.
 
-``oper`` has some functionality, mostly feeding RSS feeds into a irc
+``opr`` has some functionality, mostly feeding RSS feeds into a irc
 channel. It can do some logging of txt and take note of things todo.
 This should be the bot where you build your own one from ;]
 
@@ -46,44 +46,44 @@ This should be the bot where you build your own one from ;]
 
 **irc**
 
-| ``oper cfg server=<server> channel=<channel> nick=<nick>``
+| ``opr cfg server=<server> channel=<channel> nick=<nick>``
 |
 | (*) default channel/server is #oper on localhost
 |
 
 **sasl**
 
-| ``oper pwd <nickservnick> <nickservpass>``
-| ``oper cfg password=<outputfrompwd>``
+| ``opr pwd <nickservnick> <nickservpass>``
+| ``opr cfg password=<outputfrompwd>``
 |
 
 **users**
 
-| ``oper cfg users=True``
-| ``oper met <userhost>``
+| ``opr cfg users=True``
+| ``opr met <userhost>``
 |
 
 **rss**
 
-| ``oper rss <url>``
+| ``opr rss <url>``
 |
 
 **RUNNING**
 
-this part shows how to run ``oper``.
+this part shows how to run ``opr``.
 
 **cli**
 
 without any arguments ``oper`` doesn't respond, add arguments to have
-``oper`` execute a command:
+``opr`` execute a command:
 
-| ``$ oper``
+| ``$ opr``
 | ``$``
 |
 
 the ``cmd`` command shows you a list of available commands:
 
-| ``$ oper cmd``
+| ``$ opr cmd``
 | ``cfg,cmd,dlt,dne,dpl,flt,fnd,ftc,log,met,mre,nme,pwd,rem,rss,tdo,thr,ver``
 |
 
@@ -91,7 +91,7 @@ the ``cmd`` command shows you a list of available commands:
 
 use the -c option to start the bot as a console.
 
-| ``$ oper -c``
+| ``$ opr -c``
 | ``OPERBOT started at Fri Sep 16 02:11:23 2022``
 | ``> thr``
 | ``Console.loop/1s``
@@ -102,7 +102,7 @@ use the -c option to start the bot as a console.
 use the -i option to start the irc client.
 
 
-| ``$ oper -i``
+| ``$ opr -i``
 | ``OPER started at Fri Sep 16 02:11:23 2022``
 | ``> cfg``
 | ``server=localhost port=6667 channel=#oper nick=oper cc=!``
@@ -115,7 +115,7 @@ use the -i option to start the irc client.
 
 you can add a -r option to have the rss fetcher started.
 
-| ``$ oper-c -r``
+| ``$ opr-c -r``
 | ``OPER started at Fri Sep 16 02:44:51 2022``
 | ``> thr``
 | ``Console.loop/1s Fetcher.run/4m59s``
@@ -157,8 +157,8 @@ factored out into functions to have a clean namespace to read JSON data into.
 
 basic usage is this::
 
->>> from op import Object
->>> o = Object()
+>>> import opr
+>>> o = opr.Object()
 >>> o.key = "value"
 >>> o.key
 >>> 'value'
@@ -170,20 +170,20 @@ and values.
 
 load/save from/to disk::
 
->>> import op
->>> o = op.Object()
+>>> from opr import Object, load, save
+>>> o = Object()
 >>> o.key = "value"
->>> p = op.save(o)
->>> obj = op.Object()
->>> op.load(obj, p)
+>>> p = save(o)
+>>> obj = Object()
+>>> load(obj, p)
 >>> obj.key
 >>> 'value'
 
 great for giving objects peristence by having their state stored in files::
 
- >>> import op
- >>> o = op.Object()
- >>> op.save(o)
+ >>> from opr import Object, save
+ >>> o = Object()
+ >>> save(o)
  'op.obj.Object/2021-08-31/15:31:05.717063'
 
 **AUTHOR**
@@ -192,4 +192,4 @@ Bart Thate - operbot100@gmail.com
 
 **COPYRIGHT**
 
-``operbot`` is placed in the Public Domain. No Copyright, No License.
+``opr`` is placed in the Public Domain. No Copyright, No License.
