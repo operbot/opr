@@ -3,8 +3,8 @@ README
 
 **NAME**
 
-``opr`` - write your own commands.
-
+| ``opr`` - write your own commands.
+|
 
 **SYNOPSIS**
 
@@ -15,7 +15,11 @@ README
 
 **DESCRIPTION**
 
-``opr`` is a solid, non hackable bot, intended to be programmable in a
+With **OPR** your can have the commands of a irc bot available on your cli.
+Instead of having to join a irc channel and give commands to your bot, you
+can run these commands on your shell.
+
+**OPR** is a solid, non hackable, and is intended to be programmable in a
 static, only code, no popen, fixed imports and no reading modules from a
 directory, to not have a directory to read modules from to add
 commands to the bot but include the own programmed modules directly into the
@@ -24,132 +28,22 @@ runable. Reading random code from a directory is what gets avoided. As
 experience tells os.popen and __import__, importlib are also avoided, direct
 imports in the code is what is used.
 
-``opr`` stores it's data on disk where objects are time versioned and the
+**OPR** stores it's data on disk where objects are time versioned and the
 last version saved on disk is served to the user layer. Files are JSON dumps
 that are read-only so thus should provide (disk) persistence. Paths carry the
 type in the path name what makes reconstruction from filename easier then
 reading type from the object.
 
-``opr`` has some functionality, mostly feeding RSS feeds into a irc
-channel. It can do some logging of txt and take note of things todo.
-This should be the bot where you build your own one from ;]
+|
 
 **INSTALL**
 
-| ``pip3 install oper --upgrade --force-reinstall``
-|
-
-**CONFIGURATION**
-
-| configuration is done by calling the ``cfg`` command of ``oper``
-| 
-
-**irc**
-
-| ``opr cfg server=<server> channel=<channel> nick=<nick>``
-|
-| (*) default channel/server is #oper on localhost
-|
-
-**sasl**
-
-| ``opr pwd <nickservnick> <nickservpass>``
-| ``opr cfg password=<outputfrompwd>``
-|
-
-**users**
-
-| ``opr cfg users=True``
-| ``opr met <userhost>``
-|
-
-**rss**
-
-| ``opr rss <url>``
-|
-
-**RUNNING**
-
-this part shows how to run ``opr``.
-
-**cli**
-
-without any arguments ``oper`` doesn't respond, add arguments to have
-``opr`` execute a command:
-
-| ``$ opr``
-| ``$``
-|
-
-the ``cmd`` command shows you a list of available commands:
-
-| ``$ opr cmd``
-| ``cfg,cmd,dlt,dne,dpl,flt,fnd,ftc,log,met,mre,nme,pwd,rem,rss,tdo,thr,ver``
-|
-
-**console**
-
-use the -c option to start the bot as a console.
-
-| ``$ opr -c``
-| ``OPERBOT started at Fri Sep 16 02:11:23 2022``
-| ``> thr``
-| ``Console.loop/1s``
-|
-
-**irc**
-
-use the -i option to start the irc client.
-
-
-| ``$ opr -i``
-| ``OPER started at Fri Sep 16 02:11:23 2022``
-| ``> cfg``
-| ``server=localhost port=6667 channel=#oper nick=oper cc=!``
-| ``> thr``
-| ``Console.loop(8s) IRC.keep(8s) IRC.loop(8s) IRC.output(8s) thr(8s)``
-| ``>`` 
-|
-
-**rss**
-
-you can add a -r option to have the rss fetcher started.
-
-| ``$ opr-c -r``
-| ``OPER started at Fri Sep 16 02:44:51 2022``
-| ``> thr``
-| ``Console.loop/1s Fetcher.run/4m59s``
-| ``>``
-|
-
-**COMMANDS**
-
-here is a short description of the commands.
-
-| ``cfg`` - show the irc configuration, also edits the config
-| ``cmd`` - show all commands
-| ``dlt`` - remove a user
-| ``dne`` - flag todo as done
-| ``dpl`` - set display items for a rss feed
-| ``flt`` - show a list of bot registered to the bus
-| ``fnd`` - allow you to display objects on the datastore, read-only json files on disk 
-| ``ftc`` - run a rss feed fetching batch
-| ``log`` - log some text
-| ``met`` - add a users with there irc userhost
-| ``mre`` - displays cached output, channel wise.
-| ``nme`` - set name of a rss feed
-| ``pwd`` - combine a nickserv name/password into a sasl password
-| ``rem`` - remove a rss feed by matching is to its url
-| ``rss`` - add a feed to fetch, fetcher runs every 5 minutes
-| ``thr`` - show the running threads
-| ``tdo`` - adds a todo item, no options returns list of todo's
-| ``upt`` - show uptime
-| ``ver`` - show version
+| ``pip3 install opr --upgrade --force-reinstall``
 |
 
 **PROGRAMMING**
 
-The ``op`` package provides an Object class, that mimics a dict while using
+The ``opr`` package provides an Object class, that mimics a dict while using
 attribute access and provides a save/load to/from json files on disk.
 Objects can be searched with database functions and uses read-only files
 to improve persistence and a type in filename for reconstruction. Methods are
@@ -184,12 +78,15 @@ great for giving objects peristence by having their state stored in files::
  >>> from opr import Object, save
  >>> o = Object()
  >>> save(o)
- 'op.obj.Object/2021-08-31/15:31:05.717063'
+ 'opr.obj.Object/2021-08-31/15:31:05.717063'
+
+|
 
 **AUTHOR**
 
-Bart Thate - operbot100@gmail.com
+| Bart Thate - operbot100@gmail.com
+|
 
 **COPYRIGHT**
 
-``opr`` is placed in the Public Domain. No Copyright, No License.
+| **OPR** is placed in the Public Domain. No Copyright, No License.

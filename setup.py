@@ -16,12 +16,11 @@ setup(
     version="1",
     author="Bart Thate",
     author_email="operbot100@gmail.com",
-    url="http://github.com/operbot/oper",
+    url="http://github.com/operbot/opr",
     description="object programming runtime",
     long_description=read(),
     license="Public Domain",
     packages=["opr"],
-    scripts=["bin/opr"],
     classifiers=[
         "Development Status :: 4 - Beta",
         "License :: Public Domain",
