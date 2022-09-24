@@ -8,14 +8,10 @@ import threading
 import time
 
 
-from .obj import Object, get, name, printable, update
-from .dbs import find, fntime
-from .jsn import save
-from .utl import elapsed
-from .bus import Bus
-from .com import Command
-from .run import starttime
-
+from opr import Bus, Command, Object
+from opr import elapsed, get, name, printable, update
+from opr import find, fntime, save
+from opr.run import starttime
 
 def __dir__():
     return (

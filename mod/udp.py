@@ -5,8 +5,7 @@ import socket
 import time
 
 
-from op import Class, Object, last
-from oper import Bus, launch
+from opr import Bus, Class, Object, launch, last
 
 
 def __dir__():

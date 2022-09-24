@@ -16,16 +16,10 @@ import time
 import _thread
 
 
-from .cls import Class
-from .dft import Default
-from .obj import Object, edit, keys, printable, update
-from .jsn import save
-from .dbs import find, fntime, locked, last
-from .cbs import Callbacks
-from .clt import Client
-from .evt import Event
-from .thr import launch
-from .utl import elapsed
+from opr import Callbacks, Class, Client, Default, Event, Object
+from opr import edit, elapsed, keys, printable, save, update
+from opr import find, fntime, locked, last, launch
+
 
 def __dir__():
     return (
@@ -58,17 +52,17 @@ class NoUser(Exception):
 
 class Config(Default):
 
-    channel = "#operbot"
+    channel = ""
     control = "!"
-    nick = "operbot"
+    nick = ""
     password = ""
     port = 6667
-    realname = "operbot"
+    realname = ""
     sasl = False
     server = "localhost"
     servermodes = ""
     sleep = 60
-    username = "operbot"
+    username = ""
     users = False
 
     def __init__(self):
@@ -323,12 +317,16 @@ class IRC(Client, Output):
                 self.restart()
 
     def logon(self, server, nck):
+        assert server
+        assert nck
+        assert self.cfg.username
+        assert self.cfg.realname
         self.raw("NICK %s" % nck)
         self.raw(
                  "USER %s %s %s :%s" % (self.cfg.username,
                  server,
                  server,
-                 self.cfg.realname or "operbot")
+                 self.cfg.realname)
                 )
 
     def parsing(self, txt):
@@ -450,6 +448,8 @@ class IRC(Client, Output):
         self.state.lastline = splitted[-1]
 
     def start(self):
+        assert self.cfg.nick
+        assert self.cfg.server
         last(self.cfg)
         if self.cfg.channel not in self.channels:
             self.channels.append(self.cfg.channel)
@@ -459,8 +459,8 @@ class IRC(Client, Output):
         Client.start(self)
         launch(
                self.doconnect,
-               self.cfg.server or "localhost",
-               self.cfg.nick or "operbot", int(self.cfg.port or "6667")
+               self.cfg.server,
+               self.cfg.nick, int(self.cfg.port or "6667")
               )
         if not self.keeprunning:
             launch(self.keep)

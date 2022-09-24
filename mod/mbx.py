@@ -9,10 +9,8 @@ import os
 import time
 
 
-from .cls import Class
-from .dbs import Db, find, fntime
-from .utl elapsed
-from .obj import Object, printable, save, update
+from opr import Class, Db, Object
+from opr import elapsed, find, fntime, printable, save, update
 
 
 def __dir__():
