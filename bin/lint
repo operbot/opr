@@ -8,7 +8,9 @@ import sys
 os.environ["PYTHONPATH"] = "."
 
 
+CMD = "pylint --disable=R,C,E1101,W0201,W0212,W0613 %s"
 SKIP = ["Your code", "---"]
+TODO = ["opr",]
 
 
 def popen(txt):
@@ -24,6 +26,5 @@ def popen(txt):
             print(res)
 
 
-popen("pylint op")
-popen("pylint opr")
-popen("pylint oper")
+for name in TODO:
+    popen(CMD % name)

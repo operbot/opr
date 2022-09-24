@@ -1,7 +1,8 @@
 # This file is placed in the Public Domain.
+# pylint: disable=W0622
 
 
-"databse"
+"database"
 
 
 import _thread
@@ -12,7 +13,7 @@ from .cls import Class
 from .jsn import hook
 from .sel import Selector
 from .wdr import Wd
-from .utl import elapsed, fns, fntime
+from .utl import fns, fntime
 
 
 dblock = _thread.allocate_lock()
