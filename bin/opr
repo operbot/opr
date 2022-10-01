@@ -19,9 +19,10 @@ sys.path.insert(0, os.getcwd())
 from opr import Client, Command, Db, Event, Object, Wd, keys, printable, update
 from opr import all, parse, scan, wait, cdir, elapsed, fntime
 from opr.run import Cfg, docmd
-from mod import cmd, irc, rss
-from mod.irc import Config, IRC
-from mod.rss import Fetcher
+from opr.mod import cmd, irc, rss
+from opr.mod.irc import Config, IRC
+from opr.mod.rss import Fetcher
+
 
 Wd.workdir = os.path.expanduser("~/.opr")
 

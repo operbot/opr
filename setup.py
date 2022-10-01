@@ -20,7 +20,7 @@ setup(
     description="object programming runtime",
     long_description=read(),
     license="Public Domain",
-    packages=["opr"],
+    packages=["opr", "opr.mod"],
     classifiers=[
         "Development Status :: 4 - Beta",
         "License :: Public Domain",
