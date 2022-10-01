@@ -69,7 +69,7 @@ class Config(Default):
         super().__init__()
         self.control = Config.control
         self.channel = Config.channel
-        self.nick = Config.nick or Config.name
+        self.nick = Config.nick 
         self.password = Config.password
         self.port = Config.port
         self.realname = Config.realname

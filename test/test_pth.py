@@ -7,7 +7,7 @@
 import unittest
 
 
-from op.dbs import fntime
+from opr import fntime
 
 
 FN = "store/oper.evt.Event/2022-04-11/22:40:31.259218"
@@ -15,9 +15,6 @@ FN = "store/oper.evt.Event/2022-04-11/22:40:31.259218"
 
 class TestPath(unittest.TestCase):
 
-    "path tests."
-
     def test_path(self):
-        "check fntime."
         fnt = fntime(FN)
         self.assertEqual(fnt, 1649709631.259218)
