@@ -17,7 +17,7 @@ from urllib.request import Request, urlopen
 
 
 from opr import Bus, Class, Db, Default, Object, Repeater
-from opr import find, fntime, last, launch, save
+from opr import find, fntime, last, launch, printable, save
 from opr import edit, elapsed, get, register, spl, update
 from opr.run import Cfg
 
@@ -291,7 +291,7 @@ def rss(event):
         for _fn, feed in find("rss"):
             event.reply("%s %s %s" % (
                                       _nr,
-                                      feed,
+                                      printable(feed, "name,display_list,rss"),
                                       elapsed(time.time() - fntime(_fn)))
                                      )
             _nr += 1
