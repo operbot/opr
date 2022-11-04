@@ -102,19 +102,16 @@ def importer(packagename, modulename):
 
 def payload(cli):
     cmds = sorted(Command.cmd)
-    _nr = 0
+    nmr = 0
     for cmd in cmds:
         for ex in getattr(param, cmd, [""]):
             evt = Event()
             evt.txt = cmd + " " + ex
             evt.orig = repr(cli)
             evt.parse()
-            #print(evt)
-            #cli.put(evt)
-            cli.handle(evt)
+            cli.put(evt)
             events.append(evt)
-            _nr += 1
-    return _nr
+            nmr += 1
 
 
 def wrap(func):
@@ -134,32 +131,21 @@ def main():
         shutil.rmtree(Wd.workdir)
     txt = " ".join(sys.argv[1:])
     cfg = parse(txt)
-    if "v" in cfg.opts:
-        Cfg.verbose = True
     cprint(printable(Cfg, keys(Cfg)))
     scandir("mod", importer)
     print("commands: " +  ",".join(sorted(Command.cmd)))
     cli = CLI()
-    #cli.start()
+    cli.start()
     nrs = cfg.index or 20
     res = 1
     thrs = []
     starttime = time.time()
-    for _nr in range(nrs):
-        #thrs.append(launch(payload(cli)))
-        payload(cli)
-    if thrs:
-        for thr in thrs:
-            res += thr.join()
-    else:
-        res = nrs * len(Command.cmd)
-    if not res:
-        res = 1
+    for nmr in range(nrs):
+        thrs.append(launch(payload(cli)))
     consume(events)
     endtime = time.time()
-    print("%s %s %s (%s remaining)" %  (
+    print("%s %s (%s remaining)" %  (
                                         elapsed(endtime - starttime),
-                                        res,
                                         (endtime - starttime)/res, len(events))
                                        )
 
