@@ -770,10 +770,6 @@ class Thread(threading.Thread):
         for k in dir(self):
             yield k
 
-    def is_alive(self):
-        ""
-        return threading.Thread.is_alive(self)
-
     def join(self, timeout=None):
         ""
         super().join(timeout)
@@ -1181,7 +1177,7 @@ if __name__ == "__main__":
 
  def thr(event):
      result = []
-     for thread in sorted(threading.enumerate(), key=lambda x: x.getName()):
+     for thread in sorted(threading.enumerate(), key=lambda x: x.name):
          if str(thread).startswith("<_"):
              continue
          obj = Object()
@@ -1190,7 +1186,7 @@ if __name__ == "__main__":
              uptime = obj.sleep - int(time.time() - obj.state.latest)
          else:
              uptime = int(time.time() - obj.starttime)
-         result.append((uptime, thread.getName()))
+         result.append((uptime, thread.name))
      res = []
      for uptime, txt in sorted(result, key=lambda x: x[0]):
          res.append("%s/%s" % (txt, elapsed(uptime)))
