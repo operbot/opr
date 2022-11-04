@@ -1,5 +1,5 @@
 # This file is placed in the Public Domain.
-# pylint: disable=R,C,W
+# pylint: disable=R,C,W,C0302
 
 """object programming runtime
 
@@ -36,10 +36,10 @@ load/save from/to disk::
 
 great for giving objects peristence by having their state stored in files::
 
- >>> from opr import Object, save
- >>> o = Object()
- >>> save(o)
- 'opr.Object/c13c5369-8ada-44a9-80b3-4641986f09df/2021-08-31/15:31:05.717063'
+>>> from opr import Object, save
+>>> o = Object()
+>>> save(o)
+'opr.Object/c13c5369-8ada-44a9-80b3-4641986f09df/2021-08-31/15:31:05.717063'
 
 """
 
@@ -52,11 +52,15 @@ __version__ = "3"
 
 import datetime
 import getpass
+import inspect
 import json
 import os
 import pathlib
 import pwd
+import queue
+import threading
 import time
+import traceback
 import types
 import uuid
 
@@ -83,12 +87,10 @@ def __dir__():
             'Repeater',
             'Thread',
             'Timer',
-            'dispatch',
             'launch',
             'parse',
             'scan',
             'scandir',
-            'starttime',
             'Wd',
             'cdir',
             'dump',
@@ -112,8 +114,6 @@ def __dir__():
             'update',
             'values',
            )
-
-
 
 
 __all__ = __dir__()
@@ -254,73 +254,6 @@ def values(obj):
     return obj.__dict__.values()
 
 
-## database
-
-
-class Db:
-
-    @staticmethod
-    def find(otp, selector=None, index=None, timed=None, deleted=False):
-        if selector is None:
-            selector = {}
-        nmr = -1
-        res = []
-        for fnm in fns(Wd.getpath(otp), timed):
-            obj = hook(fnm)
-            if deleted and "__deleted__" in obj and obj.__deleted__:
-                continue
-            if selector and not search(obj, selector):
-                continue
-            nmr += 1
-            if index is not None and nmr != index:
-                continue
-            res.append(obj)            
-        return res
-
-    @staticmethod
-    def last(otp, selector=None, index=None, timed=None):
-        res =  sorted(Db.find(otp, selector, index, timed), key=lambda x: fntime(x.__fnm__))
-        if res:
-            return res[-1]
-
-def find(otp, selector=None, index=None, timed=None, deleted=False):
-    names = Class.full(otp)
-    if not names:
-        names = Wd.types(otp)
-    result = []
-    for nme in names:
-        res = Db.find(nme, selector, index, timed, deleted)
-        result.extend(res)
-    return sorted(result, key=lambda x: fntime(x.__fnm__))
-
-
-def last(obj):
-    ooo = Db.last(kind(obj))
-    if ooo:
-        update(obj, ooo)
-
-
-def match(otp, selector=None):
-    names = Class.full(otp)
-    if not names:
-        names = Wd.types(otp)
-    for nme in names:
-        for item in Db.last(nme, selector):
-            return item
-    return None
-
-
-def search(obj, selector):
-    res = False
-    select = Object(selector)
-    for key, value in items(select):
-        val = getattr(obj, key)
-        if str(value) in str(val):
-            res = True
-            break
-    return res
-
-
 ## json
 
 
@@ -421,7 +354,73 @@ def save(obj):
     return obj.__fnm__
 
 
-## type whitelist
+## database
+
+
+class Db:
+
+    @staticmethod
+    def find(otp, selector=None, index=None, timed=None, deleted=False):
+        if selector is None:
+            selector = {}
+        nmr = -1
+        res = []
+        for fnm in fns(Wd.getpath(otp), timed):
+            obj = hook(fnm)
+            if deleted and "__deleted__" in obj and obj.__deleted__:
+                continue
+            if selector and not search(obj, selector):
+                continue
+            nmr += 1
+            if index is not None and nmr != index:
+                continue
+            res.append(obj)            
+        return res
+
+    @staticmethod
+    def last(otp, selector=None, index=None, timed=None):
+        res =  sorted(Db.find(otp, selector, index, timed), key=lambda x: fntime(x.__fnm__))
+        if res:
+            return res[-1]
+
+def find(otp, selector=None, index=None, timed=None, deleted=False):
+    names = Class.full(otp)
+    if not names:
+        names = Wd.types(otp)
+    result = []
+    for nme in names:
+        res = Db.find(nme, selector, index, timed, deleted)
+        result.extend(res)
+    return sorted(result, key=lambda x: fntime(x.__fnm__))
+
+
+def last(obj):
+    ooo = Db.last(kind(obj))
+    if ooo:
+        update(obj, ooo)
+
+
+def match(otp, selector=None):
+    names = Class.full(otp)
+    if not names:
+        names = Wd.types(otp)
+    for nme in names:
+        for item in Db.last(nme, selector):
+            return item
+    return None
+
+
+def search(obj, selector):
+    res = False
+    select = Object(selector)
+    for key, value in items(select):
+        val = getattr(obj, key)
+        if str(value) in str(val):
+            res = True
+            break
+    return res
+
+## class whitelist
 
 
 class Class:
@@ -493,12 +492,6 @@ class Wd:
         return res
 
 
-Class.add(Object)
-Class.add(Default)
-
-## utility
-
-
 def cdir(path):
     if os.path.exists(path):
         return
@@ -535,33 +528,7 @@ def fns(otp, timed=None):
     return sorted(res, key=fntime)
 
 
-# This file is placed in the Public Domain.
-# pylint: disable=C0115,C0116,W0201,W0613,R0902
-
-
-"runtime"
-
-
-import inspect
-import os
-import queue
-import threading
-import traceback
-import time
-
-
-Cfg = Default()
-
-
-def scan(mod):
-    for _k, clz in inspect.getmembers(mod, inspect.isclass):
-        Class.add(clz)
-    for key, cmd in inspect.getmembers(mod, inspect.isfunction):
-        if key.startswith("cb"):
-            continue
-        names = cmd.__code__.co_varnames
-        if "event" in names:
-            Command.add(cmd)
+## runtime
 
 
 class Bus(Object):
@@ -862,59 +829,15 @@ class Repeater(Timer):
         return thr
 
 
+## utility
+
+
 def command(cli, txt):
     evt = Event()
     evt.parse(txt)
     evt.orig = repr(cli)
     cli.handle(evt)
     return evt
-
-
-def from_exception(exc, txt="", sep=" "):
-    result = []
-    for frm in traceback.extract_tb(exc.__traceback__):
-        result.append("%s:%s" % (os.sep.join(frm.filename.split(os.sep)[-2:]), frm.lineno))
-    return "%s %s: %s" % (" ".join(result), name(exc), exc, )
-
-
-def launch(func, *args, **kwargs):
-    thrname = kwargs.get("name", name(func))
-    thr = Thread(func, thrname, *args)
-    thr.start()
-    return thr
-
-
-def parse(txt):
-    prs = Parsed()
-    prs.parse(txt)
-    if "v" in prs.opts:
-        prs.verbose = True
-    return prs
-
-
-def savepid():
-    k = open(os.path.join(Wd.workdir, 'opr.pid'), "w", encoding='utf-8')
-    k.write(str(os.getpid()))
-    k.close()
-
-
-def scandir(path, func):
-    res = []
-    if not os.path.exists(path):
-        return res
-    for _fn in os.listdir(path):
-        if _fn.endswith("~") or _fn.startswith("__"):
-            continue
-        try:
-            pname = _fn.split(os.sep)[-2]
-        except IndexError:
-            pname = path
-        mname = _fn.split(os.sep)[-1][:-3]
-        res.append(func(pname, mname))
-    return res
-
-
-## utility
 
 
 def debian():
@@ -979,6 +902,7 @@ def fntime(daystr):
         t = 0
     return t
 
+
 def fnclass(path):
     pth = []
     try:
@@ -988,6 +912,61 @@ def fnclass(path):
     if not pth:
         pth = path.split(os.sep)
     return pth[0]
+
+
+def from_exception(exc, txt="", sep=" "):
+    result = []
+    for frm in traceback.extract_tb(exc.__traceback__):
+        result.append("%s:%s" % (os.sep.join(frm.filename.split(os.sep)[-2:]), frm.lineno))
+    return "%s %s: %s" % (" ".join(result), name(exc), exc, )
+
+
+def launch(func, *args, **kwargs):
+    thrname = kwargs.get("name", name(func))
+    thr = Thread(func, thrname, *args)
+    thr.start()
+    return thr
+
+
+def parse(txt):
+    prs = Parsed()
+    prs.parse(txt)
+    if "v" in prs.opts:
+        prs.verbose = True
+    return prs
+
+
+def savepid():
+    k = open(os.path.join(Wd.workdir, 'opr.pid'), "w", encoding='utf-8')
+    k.write(str(os.getpid()))
+    k.close()
+
+
+def scan(mod):
+    for _k, clz in inspect.getmembers(mod, inspect.isclass):
+        Class.add(clz)
+    for key, cmd in inspect.getmembers(mod, inspect.isfunction):
+        if key.startswith("cb"):
+            continue
+        names = cmd.__code__.co_varnames
+        if "event" in names:
+            Command.add(cmd)
+
+
+def scandir(path, func):
+    res = []
+    if not os.path.exists(path):
+        return res
+    for _fn in os.listdir(path):
+        if _fn.endswith("~") or _fn.startswith("__"):
+            continue
+        try:
+            pname = _fn.split(os.sep)[-2]
+        except IndexError:
+            pname = path
+        mname = _fn.split(os.sep)[-1][:-3]
+        res.append(func(pname, mname))
+    return res
 
 
 def locked(lock):
@@ -1014,7 +993,7 @@ def locked(lock):
     return lockeddec
 
 
-def permission(ddir, username="operbot", group="operbot", umode=0o700):
+def permission(ddir, username="opr", group="opr", umode=0o700):
     try:
         pwdline = pwd.getpwnam(username)
         uid = pwdline.pw_uid
@@ -1057,3 +1036,4 @@ def wait():
 
 Class.add(Object)
 Class.add(Default)
+Cfg = Default()
