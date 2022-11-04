@@ -4,7 +4,7 @@ README
 
 **NAME**
 
-| ``opr`` - write your own commands.
+| ``opr`` - object programming runtime
 |
 
 **SYNOPSIS**
@@ -39,6 +39,9 @@ last version saved on disk is served to the user layer. Files are JSON dumps
 that are read-only so thus should provide (disk) persistence. Paths carry the
 type in the path name what makes reconstruction from filename easier then
 reading type from the object.
+
+
+**only include your code is the path to "secure"**
 
 |
 
@@ -79,7 +82,7 @@ great for giving objects peristence by having their state stored in files::
 >>> from opr import Object, save
 >>> o = Object()
 >>> save(o)
-'opr.obj.Object/2021-08-31/15:31:05.717063'
+'opr.Object/c13c5369-8ada-44a9-80b3-4641986f09df/2021-08-31/15:31:05.717063'
 
 |
 
