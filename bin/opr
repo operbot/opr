@@ -3,6 +3,7 @@
 
 
 import atexit
+import importlib
 import os
 import readline
 import rlcompleter
@@ -14,30 +15,12 @@ import time
 
 sys.path.insert(0, os.getcwd())
 
-import opm
-
-
 from opr import Class, Wd, keys, last, printable, update
 from opr import Cfg, Command, Event, Handler
-from opr import command, parse, scan
-
-from opm.irc import Config, IRC
-from opm.rss import Fetcher
-from opm import cmds, irc, rss
-
-
-Config.nick = "opr"
-Config.channel = "#opr"
-Config.realname = "program your own commands"
-Config.username = "opr"
+from opr import command, parse, scan, scandir
 
 
 Wd.workdir = os.path.expanduser("~/.opr")
-
-
-scan(cmds)
-scan(irc)
-scan(rss)
 
 
 class CLI(Handler):
@@ -105,6 +88,11 @@ def hup(_sig, _frame):
     sys.stdout.flush()
 
 
+def importer(pname, mname):
+    modname = "%s.%s" % (pname, mname)
+    mod = importlib.import_module(modname, pname)
+    scan(mod)
+    
 def isopt(ostr):
     for opt in ostr:
         if opt in Cfg.opts:
@@ -138,16 +126,12 @@ def wrap(func):
 
 def main():
     cfg = boot()
+    scandir(Cfg.wd or "mod", importer)
     if cfg.txt:
         cli = CLI()
         return command(cli, cfg.txt)
     if Cfg.console:
         banner(cfg)
-        bot = IRC()
-        bot.start()
-        print(printable(bot.cfg, "nick,channel,server,port,sasl"))
-        fetcher = Fetcher()
-        fetcher.start()
         csl = Console()
         csl.start()
         csl.wait()
