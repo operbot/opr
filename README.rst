@@ -10,17 +10,22 @@ README
 **SYNOPSIS**
 
 
-| ``oper [-c] [-i] [-r]``
-| ``oper <cmd> [key=value] [key==value]``
+| ``opr [-c] [-i] [-r]``
+| ``opr <cmd> [key=value] [key==value]``
+|
+
+**INSTALL**
+
+| ``pip3 install opr --upgrade --force-reinstall``
 |
 
 **DESCRIPTION**
 
-With **OPR** your can have the commands of a irc bot available on your cli.
+With ``opr`` your can have the commands of a irc bot available on your cli.
 Instead of having to join a irc channel and give commands to your bot, you
 can run these commands on your shell.
 
-**OPR** is a solid, non hackable, and is intended to be programmable in a
+``opr`` is a solid, non hackable, and is intended to be programmable in a
 static, only code, no popen, fixed imports and no reading modules from a
 directory, to not have a directory to read modules from to add
 commands to the bot but include the own programmed modules directly into the
@@ -29,17 +34,12 @@ runable. Reading random code from a directory is what gets avoided. As
 experience tells os.popen and __import__, importlib are also avoided, direct
 imports in the code is what is used.
 
-**OPR** stores it's data on disk where objects are time versioned and the
+``opr`` stores it's data on disk where objects are time versioned and the
 last version saved on disk is served to the user layer. Files are JSON dumps
 that are read-only so thus should provide (disk) persistence. Paths carry the
 type in the path name what makes reconstruction from filename easier then
 reading type from the object.
 
-|
-
-**INSTALL**
-
-| ``pip3 install opr --upgrade --force-reinstall``
 |
 
 **PROGRAMMING**
@@ -83,30 +83,6 @@ great for giving objects peristence by having their state stored in files::
 
 |
 
-**SAMPLE**
-
-::
-
- bart@skull:~/opr$ python3
- Python 3.9.2 (default, Feb 28 2021, 17:03:44) 
- [GCC 10.2.1 20210110] on linux
- Type "help", "copyright", "credits" or "license" for more information.
- >>> import opr
- >>> o = opr.Object()
- >>> opr.save(o)
- 'opr.obj.Object/aee9e125-d1de-4a2f-8cce-b1727bf51535/2022-11-04/14:06:21.417366'
- >>> o.bla = "mekker"
- >>> p = opr.save(o)
- >>> oo = opr.Object()
- >>> opr.load(oo, p)
- >>> oo
- <opr.obj.Object object at 0x7f43f9599f40>
- >>> print(oo)
- {'bla': 'mekker'}
- >>> 
-
-|
-
 **AUTHOR**
 
 | Bart Thate - operbot100@gmail.com
@@ -114,4 +90,4 @@ great for giving objects peristence by having their state stored in files::
 
 **COPYRIGHT**
 
-| **OPR** is placed in the Public Domain. No Copyright, No License.
+| ``opr`` is placed in the Public Domain. No Copyright, No License.

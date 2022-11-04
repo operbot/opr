@@ -2,15 +2,13 @@
 # This file is placed in the Public Domain.
 
 
-"clear all"
-
-
 import os
 
 
 def popen(txt):
     for line in os.popen(txt).readlines():
         print(line.rstrip())
+
 
 
 popen("bin/clean")
