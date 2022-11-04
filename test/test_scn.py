@@ -6,7 +6,7 @@ import unittest
 
 
 from opr import Command, scan
-from opm import irc
+from mod import irc
 
 
 class TestScan(unittest.TestCase):

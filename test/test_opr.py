@@ -17,7 +17,7 @@ from opr import *
 Wd.workdir = ".test"
 
 
-FN = "opr.obj.Object/c13c5369-8ada-44a9-80b3-4641986f09df/2022-04-11/22:40:31.259218"
+FN = "opr.Object/c13c5369-8ada-44a9-80b3-4641986f09df/2022-04-11/22:40:31.259218"
 VALIDJSON = '{"test": "bla"}'
 
 
@@ -98,7 +98,7 @@ class TestObject(unittest.TestCase):
         save(o)
 
     def test_match(self):
-        mtc = match("opr.obj.Object", {"txt": "test"})
+        mtc = match("opr.Object", {"txt": "test"})
         self.assertTrue(not mtc)
 
     def test_find(self):
@@ -195,7 +195,7 @@ class TestObject(unittest.TestCase):
 
     def test_kind(self):
         obj = Object()
-        self.assertEqual(kind(obj), "opr.obj.Object")
+        self.assertEqual(kind(obj), "opr.Object")
 
     def test_repr(self):
         self.assertTrue(update(Object(),
@@ -304,9 +304,9 @@ class TestDb(unittest.TestCase):
     def test_fns(self):
         obj = Object()
         save(obj)
-        fnms = fns("opr.obj.Object")
+        fnms = fns("opr.Object")
         if fnms:
-            self.assertTrue("opr.obj.Object"  in fnms[0])
+            self.assertTrue("opr.Object"  in fnms[0])
         self.assertTrue(True)
 
     def test_hook(self):
