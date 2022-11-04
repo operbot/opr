@@ -2,11 +2,10 @@
 # This file is placed in the Public Domain.
 
 
-"object programming runtime"
-
-
+import atexit
 import os
 import readline
+import rlcompleter
 import signal
 import sys
 import termios
@@ -16,36 +15,31 @@ import time
 sys.path.insert(0, os.getcwd())
 
 
-from opr import Client, Command, Db, Event, Object, Wd, keys, printable, update
-from opr import all, parse, scan, wait, cdir, elapsed, fntime
-from opr.run import Cfg, docmd
-from opr.mod import cmd, irc, rss
-from opr.mod.irc import Config, IRC
-from opr.mod.rss import Fetcher
+from opr.obj import Class, Wd, keys, last, printable, update
+from opr import Cfg, Command, Event, Handler, parse, scan
+
+from opm.irc import Config, IRC
+from opm.rss import Fetcher
 
 
-Wd.workdir = os.path.expanduser("~/.opr")
+from operbot import cmds, irc, rss
 
 
-Config.nick = "opr"
-Config.channel = "#opr"
-Config.realname = "object programming runtime"
-Config.username = "opr"
+Config.nick = "operbot"
+Config.channel = "#operbot"
+Config.realname = "program your own commands"
+Config.username = "operbot"
 
 
-scan(cmd)
+Wd.workdir = os.path.expanduser("~/.operbot")
+
+
+scan(cmds)
 scan(irc)
 scan(rss)
 
 
-class CLI(Client):
-
-    @staticmethod
-    def raw(txt):
-        print(txt)
-
-
-class Console(CLI):
+class Console(Handler):
 
     @staticmethod
     def announce(txt):
@@ -53,7 +47,7 @@ class Console(CLI):
 
     @staticmethod
     def handle(event):
-        Client.handle(event)
+        Command.handle(event)
         event.wait()
 
     def poll(self):
@@ -62,58 +56,46 @@ class Console(CLI):
         event.orig = repr(self)
         return event
 
+    @staticmethod
+    def raw(txt):
+        print(txt)
+
+
+class Completer(rlcompleter.Completer):
+
+    def __init__(self, options):
+        super().__init__()
+        self.options = options
+ 
+    def complete(self, text, state):
+        if state == 0:
+            if text:
+                self.matches = [s for s in self.options if s and s.startswith(text)]
+            else:
+                self.matches = self.options[:]
+        try:
+            return self.matches[state]
+        except IndexError:
+            return None
+
 
 def banner(cfg):
     print(
-          "OPR started at %s %s" % (
+          "OPERBOT started at %s %s" % (
                                      time.ctime(time.time()).replace("  ", " "),
                                      printable(cfg, "debug,verbose")
                                     )
          )
 
 
-def daemon():
-    pid = os.fork()
-    if pid != 0:
-        os._exit(0)
-    os.setsid()
-    os.umask(0)
-    sis = open("/dev/null", 'r')
-    sos = open("/dev/null", 'a+')
-    ses = open("/dev/null", 'a+')
-    os.dup2(sis.fileno(), sys.stdin.fileno())
-    os.dup2(sos.fileno(), sys.stdout.fileno())
-    os.dup2(ses.fileno(), sys.stderr.fileno())
-
-
-def fnd(event):
-    if len(event.args) == 0:
-        print("opr fnd workdir [type] [selector]")
-        return
-    if len(event.args) == 1:
-        Wd.workdir = event.args[0]
-        res = ",".join({x.split(".")[-1].lower() for x in Wd.types()})
-        if res:
-            print(res)
-        else:
-            print("no types yet.")
-        return
-    Wd.workdir = event.args[0]
-    otype = event.args[1]
-    dbs = Db()
-    res = list(all(otype))
-    _nr = 0
-    for _fn, obj in res:
-        txt = "%s %s %s" % (
-                            str(_nr),
-                            printable(obj, keys(obj)),
-                            elapsed(time.time()-fntime(_fn))
-                           )
-        _nr += 1
-        print(txt)
-    if not _nr:
-        print("no result")
-
+def boot():
+    signal.signal(signal.SIGHUP, hup)
+    setcompleter(keys(Command.cmd))
+    txt = ' '.join(sys.argv[1:])
+    cfg = parse(txt)
+    update(Cfg, cfg)
+    banner(cfg)
+    return cfg
 
 def hup(_sig, _frame):
     print("signal 15 called")
@@ -125,6 +107,13 @@ def isopt(ostr):
         if opt in Cfg.opts:
             return True
     return False
+
+
+def setcompleter(optionlist):
+    completer = Completer(optionlist)
+    readline.set_completer(completer.complete)
+    readline.parse_and_bind("tab: complete")
+    atexit.register(lambda: readline.set_completer(None))
 
 
 def wrap(func):
@@ -145,33 +134,15 @@ def wrap(func):
 
 
 def main():
-    signal.signal(signal.SIGHUP, hup)
-    txt = ' '.join(sys.argv[1:])
-    cfg = parse(txt)
-    update(Cfg, cfg)
-    if cfg.txt:
-        Command.add(fnd)
-        cli = CLI()
-        docmd(cli, cfg.otxt)
-        return
-    if isopt("d"):
-        daemon()
-    if isopt("ci"):
-        banner(cfg)
-    if isopt("di"):
-        bot = IRC()
-        bot.start()
-        if isopt("v"):
-            print(printable(bot.cfg, "nick,channel,server,port,sasl"))
-    if isopt("r"):
-        fetcher = Fetcher()
-        fetcher.start()
-    if isopt("ci") and not isopt("d"):
-        csl = Console()
-        csl.start()
-        csl.forever()
-    if isopt("d"):
-        wait()
+    boot()
+    bot = IRC()
+    bot.start()
+    print(printable(bot.cfg, "nick,channel,server,port,sasl"))
+    fetcher = Fetcher()
+    fetcher.start()
+    csl = Console()
+    csl.start()
+    csl.wait()
         
 
 wrap(main)

@@ -13,14 +13,14 @@ def read():
 
 setup(
     name="opr",
-    version="2",
+    version="3",
     author="Bart Thate",
     author_email="operbot100@gmail.com",
     url="http://github.com/operbot/opr",
     description="object programming runtime",
     long_description=read(),
     license="Public Domain",
-    packages=["opr", "opr.mod"],
+    packages=["opr"],
     scripts=["bin/opr"],
     classifiers=[
         "Development Status :: 4 - Beta",

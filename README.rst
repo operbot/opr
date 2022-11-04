@@ -1,6 +1,7 @@
 README
 ######
 
+
 **NAME**
 
 | ``opr`` - write your own commands.
@@ -79,6 +80,30 @@ great for giving objects peristence by having their state stored in files::
  >>> o = Object()
  >>> save(o)
  'opr.obj.Object/2021-08-31/15:31:05.717063'
+
+|
+
+**SAMPLE**
+
+::
+
+ bart@skull:~/opr$ python3
+ Python 3.9.2 (default, Feb 28 2021, 17:03:44) 
+ [GCC 10.2.1 20210110] on linux
+ Type "help", "copyright", "credits" or "license" for more information.
+ >>> import opr
+ >>> o = opr.Object()
+ >>> opr.save(o)
+ 'opr.obj.Object/aee9e125-d1de-4a2f-8cce-b1727bf51535/2022-11-04/14:06:21.417366'
+ >>> o.bla = "mekker"
+ >>> p = opr.save(o)
+ >>> oo = opr.Object()
+ >>> opr.load(oo, p)
+ >>> oo
+ <opr.obj.Object object at 0x7f43f9599f40>
+ >>> print(oo)
+ {'bla': 'mekker'}
+ >>> 
 
 |
 
