@@ -8,27 +8,18 @@ import os
 
 
 ALL = [
-       "__import__",
-       "__main__",
-       "__version__",
        '"## "',
        "popen",
        "pkgutil",
-       "importlib",
        "print",
-       "sys",
-       "inspect",
-       "traceback"
       ]
 
 
 SKIP = [
         ".git",
         "README",
-        "dev",
-        "grep",
         "mod",
-        "docs"
+        "opr"
        ]
 
 

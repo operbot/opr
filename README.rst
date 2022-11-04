@@ -74,7 +74,7 @@ great for giving objects peristence by having their state stored in files::
 
 **AUTHOR**
 
-| Bart Thate - operbot100@gmail.com
+| Bart Thate
 |
 
 **COPYRIGHT**

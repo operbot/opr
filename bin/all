@@ -20,7 +20,6 @@ def popen(txt):
 popen("bin/wipe")
 popen("bin/check")
 popen("bin/build")
-popen("bin/lint")
 popen("bin/test")
 popen("bin/tinder")
 popen("bin/env")

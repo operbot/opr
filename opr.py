@@ -1039,3 +1039,254 @@ def wait():
 Class.add(Object)
 Class.add(Default)
 Cfg = Default()
+
+
+if __name__ == "__main__":
+
+ import atexit
+ import importlib
+ import os
+ import readline
+ import rlcompleter
+ import signal
+ import sys
+ import termios
+ import threading
+ import time
+
+
+ sys.path.insert(0, os.getcwd())
+
+
+ from opr import Class, Object, Wd, keys, last, printable, update
+ from opr import Cfg, Command, Event, Handler
+ from opr import command, elapsed, parse, scan, scandir
+ from opr import find, fntime, items, save, update
+
+ Wd.workdir = os.path.expanduser("~/.opr")
+
+
+ starttime = time.time()
+
+
+
+
+ class CLI(Handler):
+
+     @staticmethod
+     def announce(txt):
+         CLI.raw(txt)
+
+     @staticmethod
+     def raw(txt):
+         print(txt)
+
+
+ class Console(CLI):
+
+    @staticmethod
+    def handle(event):
+        Command.handle(event)
+        event.wait()
+
+    def poll(self):
+        event = Event()
+        event.txt = input("> ")
+        event.orig = repr(self)
+        return event
+
+
+ class Completer(rlcompleter.Completer):
+
+     def __init__(self, options):
+         super().__init__()
+         self.options = options
+ 
+     def complete(self, text, state):
+         if state == 0:
+             if text:
+                 self.matches = [s for s in self.options if s and s.startswith(text)]
+             else:
+                 self.matches = self.options[:]
+         try:
+             return self.matches[state]
+         except IndexError:
+             return None
+
+
+ class Log(Object):
+
+     def __init__(self):
+         Object.__init__(self)
+         self.txt = ""
+
+
+ Class.add(Log)
+
+
+ class Todo(Log):
+
+     pass
+
+
+ Class.add(Todo)
+
+
+ def cmd(event):
+     event.reply(",".join(sorted(Command.cmd)))
+
+
+ Command.add(cmd)
+
+
+ def log(event):
+     if not event.rest:
+         _nr = 0
+         for _fn, obj in find("log"):
+             event.reply("%s %s %s" % (
+                                       _nr,
+                                       obj.txt,
+                                       elapsed(time.time() - fntime(_fn)))
+                                      )
+             _nr += 1
+         return
+     obj = Log()
+     obj.txt = event.rest
+     save(obj)
+     event.reply("ok")
+
+
+ Command.add(log)
+
+
+ def tdo(event):
+     if not event.rest:
+         nmr = 0
+         for fnm, obj in items(find("todo")):
+             event.reply("%s %s %s" % (
+                                       nmr,
+                                       obj.txt,
+                                       elapsed(time.time() - fntime(fnm)))
+                                      )
+             nmr += 1
+         return
+     obj = Todo()
+     obj.txt = event.rest
+     save(obj)
+     event.reply("ok")
+
+
+ Command.add(tdo)
+ 
+
+ def thr(event):
+     result = []
+     for thread in sorted(threading.enumerate(), key=lambda x: x.getName()):
+         if str(thread).startswith("<_"):
+             continue
+         obj = Object()
+         update(obj, vars(thread))
+         if getattr(obj, "sleep", None):
+             uptime = obj.sleep - int(time.time() - obj.state.latest)
+         else:
+             uptime = int(time.time() - obj.starttime)
+         result.append((uptime, thread.getName()))
+     res = []
+     for uptime, txt in sorted(result, key=lambda x: x[0]):
+         res.append("%s/%s" % (txt, elapsed(uptime)))
+     if res:
+         event.reply(" ".join(res))
+     else:
+         event.reply("no threads running")
+
+
+ Command.add(thr)
+ 
+ 
+ def upt(event):
+     event.reply(elapsed(time.time()-starttime))
+
+
+ Command.add(upt)
+
+ def banner(cfg):
+     print(
+           "OPR started at %s %s" % (
+                                      time.ctime(time.time()).replace("  ", " "),
+                                      printable(cfg, "debug,verbose")
+                                     )
+          )
+
+
+ def boot():
+     signal.signal(signal.SIGHUP, hup)
+     setcompleter(keys(Command.cmd))
+     txt = ' '.join(sys.argv[1:])
+     cfg = parse(txt)
+     update(Cfg, cfg)
+     return cfg
+
+ def hup(_sig, _frame):
+     print("signal 15 called")
+     sys.stdout.flush()
+
+
+ def importer(pname, mname):
+     modname = "%s.%s" % (pname, mname)
+     mod = importlib.import_module(modname, pname)
+     scan(mod)
+
+
+ def init(pname, mname):
+     modname = "%s.%s" % (pname, mname)
+     mod = importlib.import_module(modname, pname)
+     if "init" in dir(mod):
+         mod.init()    
+        
+ def isopt(ostr):
+     for opt in ostr:
+         if opt in Cfg.opts:
+             return True
+     return False
+
+
+ def setcompleter(optionlist):
+     completer = Completer(optionlist)
+     readline.set_completer(completer.complete)
+     readline.parse_and_bind("tab: complete")
+     atexit.register(lambda: readline.set_completer(None))
+
+
+ def wrap(func):
+     fds = sys.stdin.fileno()
+     gotterm = True
+     try:
+         old = termios.tcgetattr(fds)
+     except termios.error:
+         gotterm = False
+     readline.redisplay()
+     try:
+         func()
+     except (EOFError, KeyboardInterrupt):
+         print("")
+     finally:
+         if gotterm:
+             termios.tcsetattr(fds, termios.TCSADRAIN, old)
+
+
+ def main():
+     cfg = boot()
+     scandir(Cfg.wd or "mod", importer)
+     if cfg.txt:
+         cli = CLI()
+         return command(cli, cfg.txt)
+     if Cfg.console:
+         banner(cfg)
+         scandir(Cfg.wd or "mod", init)
+         csl = Console()
+         csl.start()
+         csl.wait()
+
+
+ wrap(main)
+ 
