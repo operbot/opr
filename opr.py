@@ -10,7 +10,7 @@ functions and uses read-only files to improve persistence and a type in
 filename for reconstruction. Methods are factored out into functions to
 have a clean namespace to read JSON data into.
 
-basic usage is this::
+basic usage is this:
 
 >>> import opr
 >>> o = opr.Object()
@@ -23,7 +23,7 @@ attribute access as well. hidden methods are provided, the methods are
 factored out into functions like get, items, keys, register, set, update
 and values.
 
-load/save from/to disk::
+load/save from/to disk:
 
 >>> from opr import Object, load, save
 >>> o = Object()
@@ -34,12 +34,12 @@ load/save from/to disk::
 >>> obj.key
 >>> 'value'
 
-great for giving objects peristence by having their state stored in files::
+great for giving objects peristence by having their state stored in files:
 
 >>> from opr import Object, save
 >>> o = Object()
 >>> save(o)
-'opr.Object/c13c5369-8ada-44a9-80b3-4641986f09df/2021-08-31/15:31:05.717063'
+>>> 'opr.Object/c13c5369-8ada-44a9-80b3-4641986f09df/2021-08-31/15:31:05.717063'
 
 """
 
@@ -130,7 +130,7 @@ class Object:
         object.__init__(self)
         self.__fnm__ = os.path.join(
             kind(self),
-            str(uuid.uuid4()),
+            str(uuid.uuid4().hex),
             os.sep.join(str(datetime.datetime.now()).split()),
         )
         if args:
@@ -1137,14 +1137,14 @@ if __name__ == "__main__":
 
  def log(event):
      if not event.rest:
-         _nr = 0
-         for _fn, obj in find("log"):
+         nmr = 0
+         for obj in find("log"):
              event.reply("%s %s %s" % (
-                                       _nr,
+                                       nmr,
                                        obj.txt,
-                                       elapsed(time.time() - fntime(_fn)))
+                                       elapsed(time.time() - fntime(obj.__fnm__)))
                                       )
-             _nr += 1
+             nmr += 1
          return
      obj = Log()
      obj.txt = event.rest
@@ -1158,11 +1158,11 @@ if __name__ == "__main__":
  def tdo(event):
      if not event.rest:
          nmr = 0
-         for fnm, obj in items(find("todo")):
+         for obj in find("todo"):
              event.reply("%s %s %s" % (
                                        nmr,
                                        obj.txt,
-                                       elapsed(time.time() - fntime(fnm)))
+                                       elapsed(time.time() - fntime(obj.__fnm__)))
                                       )
              nmr += 1
          return
@@ -1204,6 +1204,14 @@ if __name__ == "__main__":
 
 
  Command.add(upt)
+
+
+ def ver(event):
+     event.reply("OPR %s" % __version__)
+
+
+ Command.add(ver)
+
 
  def banner(cfg):
      print(
