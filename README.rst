@@ -82,8 +82,7 @@ great for giving objects peristence by having their state stored in files::
 >>> from opr import Object, save
 >>> o = Object()
 >>> save(o)
-| 'opr.Object/c13c5369-8ada-44a9-80b3-4641986f09df/2021-08-31/15:31:05.717063'
-|
+>>> 'opr.Object/c13c5369-8ada-44a9-80b3-4641986f09df/2021-08-31/15:31:05.717063'
 
 **AUTHOR**
 
