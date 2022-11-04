@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 # This file is placed in the Public Domain.
-# pylint: disable=C0413,W0613
-
-
-"tinder"
 
 
 import importlib
@@ -18,9 +14,9 @@ import traceback
 sys.path.insert(0, os.getcwd())
 
 
-from opr import Object, Wd,  elapsed, get, keys, name, printable
-from opr import Client, Command, Event, parse, scandir, scan
-from opr.run import Cfg
+from opr import Object, Wd,  elapsed, keys, name, printable
+from opr import Cfg, Command, Event, Handler, launch, parse, scandir, scan
+
 
 Cfg.debug = True
 Cfg.threaded = False
@@ -34,16 +30,28 @@ results = []
 
 
 param = Object()
-param.add = ["test@shell", "bart", ""]
-param.cfg = ["server=localhost", ""]
-param.dne = ["test4", ""]
-param.rem = ["reddit", ""]
-param.dpl = ["reddit title,summary,link", ""]
-param.log = ["test1", ""]
-param.flt = ["0", ""]
-param.fnd = ["cfg", "log", "rss", "log txt==test", "cfg server==localhost", "rss rss==reddit"]
+param.cfg = ["server=localhost"]
+param.cmd = [""]
+param.cor = ["bthate@gmail.com"]
+param.dlt = ["test@shell"]
+param.dne = ["test4"]
+param.dpl = ["reddit title,summary,link"]
+param.eml = ["bthate@gmail.com"]
+param.flt = ["", "0"]
+param.ftc = [""]
+param.log = ["test1"]
+param.mbx = ["~/25-01-2013"]
+param.met = ["test@shell"]
+param.mre = [""]
+param.nme = ["reddit reddit"]
+param.pwd = ["bart test"]
+param.rem = ["reddit"]
 param.rss = ["https://www.reddit.com/r/python/.rss"]
+param.sts = [""]
 param.tdo = ["test4", ""]
+param.thr = [""]
+param.upt = [""]
+
 
 
 def cprint(txt):
@@ -51,10 +59,10 @@ def cprint(txt):
     sys.stdout.flush()
 
 
-class CLI(Client):
+class CLI(Handler):
 
     def __init__(self):
-        Client.__init__(self)
+        Handler.__init__(self)
 
     def raw(self, txt):
         if Cfg.verbose:
@@ -75,9 +83,9 @@ def consume(evts):
     return res
 
 
-def from_exception(exc, txt="", sep=" "):
+def from_exception(exc):
     result = []
-    for frm in traceback.extract_tb(exc.__traceback__):
+    for frm in traceback.extract_tb(exc.__traceback__)[::-1]:
         result.append("%s:%s" % (os.sep.join(frm.filename.split(os.sep)[-2:]), frm.lineno))
     return "%s(%s) %s" % (name(exc), exc, " ".join(result))
 
@@ -95,12 +103,13 @@ def payload(cli):
     cmds = sorted(Command.cmd)
     _nr = 0
     for cmd in cmds:
-        for ex in get(param, cmd, [""]):
+        for ex in getattr(param, cmd, [""]):
             evt = Event()
             evt.txt = cmd + " " + ex
             evt.orig = repr(cli)
             evt.parse()
-            #c.put(e)
+            #print(evt)
+            #cli.put(evt)
             cli.handle(evt)
             events.append(evt)
             _nr += 1
@@ -129,14 +138,16 @@ def main():
     cprint(printable(Cfg, keys(Cfg)))
     scandir("op", importer)
     scandir("oper", importer)
-    scandir("opermod", importer)
+    scandir("operbot", importer)
+    print("commands: " +  ",".join(sorted(Command.cmd)))
     cli = CLI()
-    cli.start()
+    #cli.start()
     nrs = cfg.index or 20
     res = 1
     thrs = []
     starttime = time.time()
     for _nr in range(nrs):
+        #thrs.append(launch(payload(cli)))
         payload(cli)
     if thrs:
         for thr in thrs:

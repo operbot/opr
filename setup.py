@@ -20,8 +20,7 @@ setup(
     description="object programming runtime",
     long_description=read(),
     license="Public Domain",
-    packages=["opr"],
-    scripts=["bin/opr"],
+    py_modules=["opr"],
     classifiers=[
         "Development Status :: 4 - Beta",
         "License :: Public Domain",

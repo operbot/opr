@@ -8,9 +8,9 @@ import threading
 import time
 
 
-from .obj import Class, Object, find, fntime, items, save, update
-from .run import Command
-from .utl import elapsed
+from opr import Class, Object, find, fntime, items, save, update
+from opr import Command
+from opr import elapsed
 
 
 starttime = time.time()

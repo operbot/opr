@@ -14,24 +14,23 @@ import time
 
 sys.path.insert(0, os.getcwd())
 
+import opm
 
-from opr.obj import Class, Wd, keys, last, printable, update
+
+from opr import Class, Wd, keys, last, printable, update
 from opr import Cfg, Command, Event, Handler, parse, scan
-
 from opm.irc import Config, IRC
 from opm.rss import Fetcher
+from opm import cmds, irc, rss
 
 
-from operbot import cmds, irc, rss
-
-
-Config.nick = "operbot"
-Config.channel = "#operbot"
+Config.nick = "opr"
+Config.channel = "#opr"
 Config.realname = "program your own commands"
-Config.username = "operbot"
+Config.username = "opr"
 
 
-Wd.workdir = os.path.expanduser("~/.operbot")
+Wd.workdir = os.path.expanduser("~/.opr")
 
 
 scan(cmds)
@@ -81,7 +80,7 @@ class Completer(rlcompleter.Completer):
 
 def banner(cfg):
     print(
-          "OPERBOT started at %s %s" % (
+          "OPR started at %s %s" % (
                                      time.ctime(time.time()).replace("  ", " "),
                                      printable(cfg, "debug,verbose")
                                     )
