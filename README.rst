@@ -25,23 +25,11 @@ With ``opr`` your can have the commands of a irc bot available on your cli.
 Instead of having to join a irc channel and give commands to your bot, you
 can run these commands on your shell.
 
-``opr`` is a solid, non hackable, and is intended to be programmable in a
-static, only code, no popen, fixed imports and no reading modules from a
-directory, to not have a directory to read modules from to add
-commands to the bot but include the own programmed modules directly into the
-python code, so only trusted code (your own written code) is included and
-runable. Reading random code from a directory is what gets avoided. As
-experience tells os.popen and __import__, importlib are also avoided, direct
-imports in the code is what is used.
-
 ``opr`` stores it's data on disk where objects are time versioned and the
 last version saved on disk is served to the user layer. Files are JSON dumps
 that are read-only so thus should provide (disk) persistence. Paths carry the
 type in the path name what makes reconstruction from filename easier then
 reading type from the object.
-
-
-**only include your code is the path to "secure"**
 
 |
 
