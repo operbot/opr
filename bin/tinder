@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.11
 # This file is placed in the Public Domain.
 
 
@@ -38,6 +38,7 @@ param.dne = ["test4"]
 param.dpl = ["reddit title,summary,link"]
 param.eml = ["bthate@gmail.com"]
 param.flt = ["", "0"]
+param.fnd = ["config", "rss", "log", "todo"]
 param.ftc = [""]
 param.log = ["test1"]
 param.mbx = ["~/25-01-2013"]
