@@ -27,7 +27,7 @@ class CLI(Handler):
 
     @staticmethod
     def announce(txt):
-        self.raw(txt)
+        CLI.raw(txt)
 
     @staticmethod
     def raw(txt):
@@ -92,7 +92,14 @@ def importer(pname, mname):
     modname = "%s.%s" % (pname, mname)
     mod = importlib.import_module(modname, pname)
     scan(mod)
-    
+
+
+def init(pname, mname):
+    modname = "%s.%s" % (pname, mname)
+    mod = importlib.import_module(modname, pname)
+    if "init" in dir(mod):
+        mod.init()    
+        
 def isopt(ostr):
     for opt in ostr:
         if opt in Cfg.opts:
@@ -132,6 +139,7 @@ def main():
         return command(cli, cfg.txt)
     if Cfg.console:
         banner(cfg)
+        scandir(Cfg.wd or "mod", init)
         csl = Console()
         csl.start()
         csl.wait()

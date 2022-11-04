@@ -29,6 +29,13 @@ from opr import elapsed, locked
 saylock = _thread.allocate_lock()
 
 
+def init():
+    irc = IRC()
+    irc.start()
+    print(printable(irc.cfg, "nick,channel,server,port,sasl"))
+    return irc
+
+
 class NoUser(Exception):
 
     pass
@@ -36,17 +43,17 @@ class NoUser(Exception):
 
 class Config(Default):
 
-    channel = "#objectprogramming"
+    channel = "#opr"
     control = "!"
-    nick = "op"
+    nick = "opr"
     password = ""
     port = 6667
-    realname = "object programming"
+    realname = "object programming runtime"
     sasl = False
     server = "localhost"
     servermodes = ""
     sleep = 60
-    username = "op"
+    username = "opr"
     users = False
 
     def __init__(self):
