@@ -1,16 +1,14 @@
 # This file is placed in the Public Domain.
-# pylint: disable=E1101,C0116,C0413,C0411
 
 
-"command"
+"test commands"
 
 
 import sys
 import unittest
 
 
-from opr import Client, Command, Object, get
-from opr.run import Cfg, docmd
+from opr import Cfg, Command, Handler, Object, command
 
 
 evts = []
@@ -27,7 +25,7 @@ param.mre = [""]
 param.thr = [""]
 
 
-class CLI(Client):
+class CLI(Handler):
 
     "test cli class"
 
@@ -64,8 +62,8 @@ class TestCommands(unittest.TestCase):
         for cmd in cmds:
             if cmd in skip:
                 continue
-            for ex in get(param, cmd, ""):
-                evt = docmd(cli, cmd + " " + ex)
+            for ex in getattr(param, cmd, ""):
+                evt = command(cli, cmd + " " + ex)
                 evts.append(evt)
         consume(evts)
         self.assertTrue(not evts)

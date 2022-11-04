@@ -7,7 +7,7 @@
 import unittest
 
 
-from mod.irc import User
+from opm.irc import User
 
 
 class TestUser(unittest.TestCase):

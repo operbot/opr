@@ -8,7 +8,7 @@
 import unittest
 
 
-from opr.thr import Thread
+from opr import Thread
 
 
 def test():

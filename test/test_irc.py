@@ -8,7 +8,7 @@
 import unittest
 
 
-from mod.irc import IRC
+from opm.irc import IRC
 
 
 class TestIRC(unittest.TestCase):

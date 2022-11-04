@@ -8,16 +8,15 @@
 import unittest
 
 
-from opr.bus import Bus
-from opr.clt import Client
+from opr import Bus, Handler
 
 
-class MyClient(Client):
+class Client(Handler):
 
     gotcha = False
 
-    def raw(self, txt):
-        self.gotcha = True
+    def announce(self, txt):
+        Client.gotcha = True
 
 
 class TestBus(unittest.TestCase):
@@ -28,25 +27,25 @@ class TestBus(unittest.TestCase):
 
     def test_add(self):
         bus = Bus()
-        clt = MyClient()
+        clt = Client()
         bus.add(clt)
         self.assertTrue(clt in bus.objs)
 
     def test_announce(self):
         bus = Bus()
-        clt = MyClient()
+        clt = Client()
         bus.add(clt)
         bus.announce("test")
-        self.assertTrue(clt.gotcha)
+        self.assertTrue(Client.gotcha)
 
     def test_byorig(self):
         bus = Bus()
-        clt = MyClient()
+        clt = Client()
         self.assertEqual(bus.byorig(repr(clt)), clt)
 
     def test_say(self):
         bus = Bus()
-        clt = MyClient()
+        clt = Client()
         bus.add(clt)
         bus.say(repr(clt), "#test", "test")
-        self.assertTrue(clt.gotcha)
+        self.assertTrue(Client.gotcha)

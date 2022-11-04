@@ -7,7 +7,7 @@
 import unittest
 
 
-from mod.rss import Fetcher
+from opm.rss import Fetcher
 
 
 class TestRss(unittest.TestCase):

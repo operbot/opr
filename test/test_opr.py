@@ -1,56 +1,73 @@
 # This file is placed in the Public Domain.
+# pylint: disable=W0401,W0621,W0614,W1503
 
 
-"object"
+"op tests"
 
 
-import json
+import opr
 import os
 import unittest
+import _thread
 
 
-from opr import Object, get, items, keys, register, update, values
-from opr import load, otype, save
-from opr import edit, printable
-from opr import ObjectDecoder, ObjectEncoder
-from opr import Wd
+from opr import *
 
 
 Wd.workdir = ".test"
 
 
+FN = "opr.obj.Object/c13c5369-8ada-44a9-80b3-4641986f09df/2022-04-11/22:40:31.259218"
 VALIDJSON = '{"test": "bla"}'
 
 
+testlock = _thread.allocate_lock()
+
+
 attrs1 = (
-         'Object',
-         'Wd',
-         'clear',
-         'copy',
-         'fromkeys',
-         'get',
-         'items',
-         'keys',
-         'matchkey',
-         'pop',
-         'popitem',
-         "register",
-         'save',
-         'setdefault',
-         'update',
-         'values',
-        )
+            'Class',
+            'Db',
+            'Default',
+            'Object',
+            'ObjectDecoder',
+            'ObjectEncoder',
+            'Wd',
+            'cdir',
+            'dump',
+            'dumps',
+            'edit',
+            'find',
+            'fns',
+            'fntime',
+            'hook',
+            'items',
+            'keys',
+            'kind',
+            'last',
+            'load',
+            'loads',
+            'match',
+            'name',
+            'printable',
+            'register',
+            'save',
+            'update',
+            'values',
+     )
 
 attrs2 = (
           '__class__',
           '__delattr__',
+          '__delitem__',
           '__dict__',
           '__dir__',
           '__doc__',
           '__eq__',
+          '__fnm__',
           '__format__',
           '__ge__',
           '__getattribute__',
+          '__getitem__',
           '__gt__',
           '__hash__',
           '__init__',
@@ -66,22 +83,50 @@ attrs2 = (
           '__reduce_ex__',
           '__repr__',
           '__setattr__',
+          '__setitem__',
           '__sizeof__',
+          '__slots__',
           '__str__',
           '__subclasshook__',
-          '__weakref__'
          )
 
 
-def dumps(name):
-    return json.dumps(name, cls=ObjectEncoder)
-
-
-def loads(name):
-    return json.loads(name, cls=ObjectDecoder)
-
-
 class TestObject(unittest.TestCase):
+
+    def setUp(self):
+        o = Object()
+        save(o)
+
+    def test_match(self):
+        mtc = match("opr.obj.Object", {"txt": "test"})
+        self.assertTrue(not mtc)
+
+    def test_find(self):
+        objs = find("object")
+        if objs:
+            self.assertTrue("opr.col.Collection" in objs[0])
+        self.assertTrue(True)
+
+    def test_default(self):
+        dft = Default()
+        self.assertEqual(type(dft), Default)
+
+    def test_name(self):
+        obj = Object()
+        self.assertEqual(name(obj), "Object")    
+
+    def test_decoder(self):
+        obj = ObjectDecoder().decode('{"bla": "mekker"}')
+        self.assertEqual(obj.bla, "mekker")
+
+    def test_encoder(self):
+        obj = Object()
+        obj.bla = "mekker"
+        jsn = ObjectEncoder().encode(obj)
+        self.assertEqual(jsn, '{"bla": "mekker"}')
+
+    def test_interface(self):
+        self.assertTrue(dir(opr), attrs1)
 
     def test_constructor(self):
         obj = Object()
@@ -112,10 +157,6 @@ class TestObject(unittest.TestCase):
         self.assertEqual(
             dir(obj), list(attrs2)
         )
-
-    def test_doc(self):
-        obj = Object()
-        self.assertEqual(obj.__doc__, None)
 
     def test_format(self):
         obj = Object()
@@ -150,10 +191,11 @@ class TestObject(unittest.TestCase):
         self.assertEqual(len(obj), 0)
 
     def test_module(self):
-        self.assertTrue(Object().__module__, "op")
+        self.assertTrue(Object().__module__, "obj")
 
-    def test_otype(self):
-        self.assertEqual(otype(Object()), "opr.obj.Object")
+    def test_kind(self):
+        obj = Object()
+        self.assertEqual(kind(obj), "opr.obj.Object")
 
     def test_repr(self):
         self.assertTrue(update(Object(),
@@ -179,12 +221,12 @@ class TestObject(unittest.TestCase):
 
     def test_printable(self):
         obj = Object()
-        self.assertEqual(printable(obj), "")
+        self.assertEqual(printable(obj, keys(obj)), "")
 
     def test_get(self):
         obj = Object()
         obj.key = "value"
-        self.assertEqual(get(obj, "key"), "value")
+        self.assertEqual(getattr(obj, "key"), "value")
 
     def test_keys(self):
         obj = Object()
@@ -217,7 +259,6 @@ class TestObject(unittest.TestCase):
         obj.test = "bla"
         self.assertEqual(dumps(obj), VALIDJSON)
 
-
     def test_load(self):
         obj = Object()
         obj.key = "value"
@@ -232,7 +273,6 @@ class TestObject(unittest.TestCase):
         self.assertEqual(obj.key, "value")
 
     def test_save(self):
-        Wd.workdir = ".test"
         obj = Object()
         path = save(obj)
         self.assertTrue(os.path.exists(os.path.join(Wd.workdir, "store", path)))
@@ -253,3 +293,73 @@ class TestObject(unittest.TestCase):
                 "value",
             ],
         )
+
+
+class TestDb(unittest.TestCase):
+
+    def test_cdir(self):
+        cdir(".test")
+        self.assertTrue(os.path.exists(".test"))
+
+    def test_fns(self):
+        obj = Object()
+        save(obj)
+        fnms = fns("opr.obj.Object")
+        if fnms:
+            self.assertTrue("opr.obj.Object"  in fnms[0])
+        self.assertTrue(True)
+
+    def test_hook(self):
+        obj = Object()
+        obj.key = "value"
+        pth = save(obj)
+        oobj = hook(pth)
+        self.assertEqual(oobj.key, "value")
+
+    def test_last(self):
+        oobj = Object()
+        oobj.key = "value"
+        save(oobj)
+        last(oobj)
+        self.assertEqual(oobj.key, "value")
+
+
+class Composite(Object):
+
+    def __init__(self):
+        super().__init__()
+        self.dbs = Db()
+
+
+Class.add(Composite)
+
+
+class TestComposite(unittest.TestCase):
+
+    def test_composite(self):
+        composite = Composite()
+        path = dump(composite, os.path.join(Wd.workdir, "compositetest"))
+        composite2 = Composite()
+        load(composite2, path)
+        self.assertEqual(type(composite2.dbs), Db)
+
+
+class TestPath(unittest.TestCase):
+
+    def test_path(self):
+        fnt = fntime(FN)
+        self.assertEqual(fnt, 1649709631.259218)
+
+
+class TestJSON(unittest.TestCase):
+
+    def test_json(self):
+        obj = Object()
+        obj.test = "bla"
+        res = loads(dumps(obj))
+        self.assertEqual(res.test, "bla")
+
+    def test_jsondump(self):
+        obj = Object()
+        obj.test = "bla"
+        self.assertEqual(dumps(obj), VALIDJSON)
