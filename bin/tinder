@@ -136,9 +136,7 @@ def main():
     if "v" in cfg.opts:
         Cfg.verbose = True
     cprint(printable(Cfg, keys(Cfg)))
-    scandir("op", importer)
-    scandir("oper", importer)
-    scandir("operbot", importer)
+    scandir("mod", importer)
     print("commands: " +  ",".join(sorted(Command.cmd)))
     cli = CLI()
     #cli.start()
