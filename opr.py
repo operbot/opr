@@ -130,7 +130,7 @@ class Object:
         object.__init__(self)
         self.__fnm__ = os.path.join(
             kind(self),
-            uuid.uuid4().hex,
+            str(uuid.uuid4().hex),
             os.sep.join(str(datetime.datetime.now()).split()),
         )
         if args:
