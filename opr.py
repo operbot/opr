@@ -931,6 +931,8 @@ def launch(func, *args, **kwargs):
 def parse(txt):
     prs = Parsed()
     prs.parse(txt)
+    if "c" in prs.opts:
+        prs.console = True
     if "v" in prs.opts:
         prs.verbose = True
     return prs
