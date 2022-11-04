@@ -278,14 +278,6 @@ class Thread(threading.Thread):
         for k in dir(self):
             yield k
 
-    def daemon(self):
-        ""
-        return threading.Thread.daemon(self)
-
-    def ident(self):
-        ""
-        return threading.Thread.ident(self)
-
     def is_alive(self):
         ""
         return threading.Thread.is_alive(self)
@@ -295,14 +287,6 @@ class Thread(threading.Thread):
         super().join(timeout)
         return self._result
 
-    def name(self):
-        ""
-        return threading.Thread.name()
-
-    def native_id(self):
-        ""
-        return threading.Thread.native_id(self)
-
     def run(self) -> None:
         ""
         func, args = self.queue.get()
@@ -311,9 +295,6 @@ class Thread(threading.Thread):
         self.starttime = time.time()
         self._result = func(*args)
 
-    def start(self):
-        ""
-        threading.Thread.start(self)
 
 class Timer(Object):
 

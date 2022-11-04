@@ -17,8 +17,8 @@ from urllib.request import Request, urlopen
 
 
 from .obj import Class, Db, Default, Object
-from .obj import find, fntime, items, last, printable, save
-from .obj import edit, register, update, values
+from .obj import find, fntime, last, printable, save
+from .obj import edit, register, update
 from .run import Bus, Cfg, Repeater, launch
 from .utl import elapsed, spl
 

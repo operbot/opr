@@ -10,7 +10,7 @@ os.environ["PYTHONPATH"] = "."
 
 CMD = "pylint --disable=R,C,E1101,W0201,W0212,W0613 %s"
 SKIP = ["Your code", "---"]
-TODO = ["opr", 'opr/mod']
+TODO = ["opr", 'opm']
 
 
 def popen(txt):
