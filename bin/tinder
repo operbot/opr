@@ -15,10 +15,11 @@ sys.path.insert(0, os.getcwd())
 
 
 from opr.evt import Event
-from opr.obj import Object, Wd, keys, name, printable
+from opr.obj import Object, Wd, keys, name, printable, update
 from opr.hdl import Command, Handler
 from opr.prs import parse
 from opr.thr import launch
+from opr.trc import from_exception
 from opr.utl import elapsed
 
 
@@ -81,7 +82,6 @@ def consume(evts):
     fixed = []
     res = []
     for evt in evts:
-        print(evt.txt)
         evt.wait()
         fixed.append(evt)
     for fix in fixed:
@@ -116,7 +116,6 @@ def payload(cli):
             evt = Event()
             evt.txt = cmd + " " + ex
             evt.orig = repr(cli)
-            evt.parse()
             cli.put(evt)
             events.append(evt)
             nmr += 1
@@ -139,6 +138,7 @@ def main():
         shutil.rmtree(Wd.workdir)
     txt = " ".join(sys.argv[1:])
     cfg = parse(txt)
+    update(Cfg, cfg)
     cprint(printable(Cfg, keys(Cfg)))
     scandir("mod", importer)
     print("commands: " +  ",".join(sorted(Command.cmd)))
@@ -148,8 +148,11 @@ def main():
     res = 1
     thrs = []
     starttime = time.time()
+    print(f"index is {nrs}")
     for nmr in range(nrs):
-        thrs.append(launch(payload(cli)))
+        thrs.append(launch(payload, cli))
+    for thr in thrs:
+        thr.join()
     consume(events)
     endtime = time.time()
     print("%s %s (%s remaining)" %  (
