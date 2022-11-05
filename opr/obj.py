@@ -39,7 +39,7 @@ great for giving objects peristence by having their state stored in files:
 >>> from opr import Object, save
 >>> o = Object()
 >>> save(o)
->>> 'opr.Object/c13c5369-8ada-44a9-80b3-4641986f09df/2021-08-31/15:31:05.717063'
+>>> 'opr.obj.Object/c13c5369-8ada-44a9-80b3-4641986f09df/2021-08-31/15:31:05.717063'
 
 """
 
@@ -307,17 +307,6 @@ def dumps(obj):
     return json.dumps(obj, cls=ObjectEncoder)
 
 
-def hook(path):
-    cname = fnclass(path)
-    cls = Class.get(cname)
-    if cls:
-        obj = cls()
-    else:
-        obj = Object()
-    load(obj, path)
-    return obj
-
-
 def load(obj, opath):
     splitted = opath.split(os.sep)
     fnm = os.sep.join(splitted[-4:])
@@ -370,6 +359,71 @@ class Db:
         res =  sorted(Db.find(otp, selector, index, timed), key=lambda x: fntime(x.__fnm__))
         if res:
             return res[-1]
+
+
+def fnclass(path):
+    pth = []
+    try:
+        _rest, *pth = path.split("store")
+    except ValueError:
+        pass
+    if not pth:
+        pth = path.split(os.sep)
+    return pth[0]
+
+
+def fns(otp, timed=None):
+    if not otp:
+        return []
+    assert Wd.workdir
+    p = os.path.join(Wd.workdir, "store", otp) + os.sep
+    res = []
+    d = ""
+    for rootdir, dirs, _files in os.walk(p, topdown=False):
+        if dirs:
+            d = sorted(dirs)[-1]
+            if d.count("-") == 2:
+                dd = os.path.join(rootdir, d)
+                fls = sorted(os.listdir(dd))
+                if fls:
+                    p = os.path.join(dd, fls[-1])
+                    if (
+                        timed
+                        and "from" in timed
+                        and timed["from"]
+                        and fntime(p) < timed["from"]
+                    ):
+                        continue
+                    if timed and timed.to and fntime(p) > timed.to:
+                        continue
+                    res.append(p)
+    return sorted(res, key=fntime)
+
+def fntime(daystr):
+    daystr = daystr.replace("_", ":")
+    datestr = " ".join(daystr.split(os.sep)[-2:])
+    if "." in datestr:
+        datestr, rest = datestr.rsplit(".", 1)
+    else:
+        rest = ""
+    t = time.mktime(time.strptime(datestr, "%Y-%m-%d %H:%M:%S"))
+    if rest:
+        t += float("." + rest)
+    else:
+        t = 0
+    return t
+
+
+def hook(path):
+    cname = fnclass(path)
+    cls = Class.get(cname)
+    if cls:
+        obj = cls()
+    else:
+        obj = Object()
+    load(obj, path)
+    return obj
+
 
 def find(otp, selector=None, index=None, timed=None, deleted=False):
     names = Class.full(otp)
@@ -489,32 +543,7 @@ def cdir(path):
     pathlib.Path(path).mkdir(parents=True, exist_ok=True)
     
 
-def fns(otp, timed=None):
-    if not otp:
-        return []
-    assert Wd.workdir
-    p = os.path.join(Wd.workdir, "store", otp) + os.sep
-    res = []
-    d = ""
-    for rootdir, dirs, _files in os.walk(p, topdown=False):
-        if dirs:
-            d = sorted(dirs)[-1]
-            if d.count("-") == 2:
-                dd = os.path.join(rootdir, d)
-                fls = sorted(os.listdir(dd))
-                if fls:
-                    p = os.path.join(dd, fls[-1])
-                    if (
-                        timed
-                        and "from" in timed
-                        and timed["from"]
-                        and fntime(p) < timed["from"]
-                    ):
-                        continue
-                    if timed and timed.to and fntime(p) > timed.to:
-                        continue
-                    res.append(p)
-    return sorted(res, key=fntime)
+## runtime
 
 
 Class.add(Object)

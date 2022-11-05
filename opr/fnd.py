@@ -5,7 +5,8 @@
 import time
 
 
-from opr import Wd, elapsed, find, fntime, keys, printable
+from opr.obj import Wd, find, fntime, keys, printable
+from opr.utl import elapsed
 
 
 def fnd(event):

@@ -8,7 +8,9 @@ import threading
 import time
 
 
-from opr import Class, Command, Object, elapsed, find, fntime, items, save, update
+from opr.hdl import Command
+from opr.obj import Class, Object, find, fntime, items, save, update
+from opr.utl import elapsed
 
 
 starttime = time.time()
@@ -78,7 +80,7 @@ def thr(event):
         obj = Object()
         update(obj, vars(thread))
         if getattr(obj, "sleep", None):
-            uptime = obj.sleep - int(time.time() - obj.state.latest)
+            uptime = obj.sleep - int(time.time() - obj.state["latest"])
         else:
             uptime = int(time.time() - obj.starttime)
         result.append((uptime, thread.getName()))

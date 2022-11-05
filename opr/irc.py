@@ -18,12 +18,14 @@ import threading
 import _thread
 
 
-from opr import Class, Default, Object
-from opr import items, keys, last, printable
-from opr import edit, fntime, find, save, update
-from opr import register
-from opr import Command, Event, Handler, launch
-from opr import elapsed, locked
+from opr.evt import Event
+from opr.obj import Class, Default, Object
+from opr.obj import items, keys, last, printable
+from opr.obj import edit, fntime, find, save, update
+from opr.obj import register
+from opr.hdl import Command, Handler
+from opr.thr import launch
+from opr.utl import elapsed, locked
 
 
 saylock = _thread.allocate_lock()
