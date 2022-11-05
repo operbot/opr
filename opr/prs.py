@@ -14,7 +14,7 @@ __version__ = "1"
 import threading
 
 
-from .obj import Default
+from .obj import Default, register
 
 
 ## defines

@@ -48,7 +48,7 @@ import inspect
 import os
 
 
-from .obj import Class, Default
+from .obj import Class, Default, Wd
 from .evt import Event
 from .hdl import Command
 
@@ -80,6 +80,12 @@ def command(cli, txt):
     evt.orig = repr(cli)
     cli.handle(evt)
     return evt
+
+
+def savepid():
+    k = open(os.path.join(Wd.workdir, 'opr.pid'), "w", encoding='utf-8')
+    k.write(str(os.getpid()))
+    k.close()
 
 
 def scan(mod):

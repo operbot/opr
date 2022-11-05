@@ -8,6 +8,19 @@
 __version__ = "1"
 
 
+## imports
+
+
+import getpass
+import os
+import pwd
+import time
+import traceback
+
+
+from stat import ST_UID, ST_MODE, S_IMODE
+
+
 ## utility
 
 
@@ -57,19 +70,6 @@ def elapsed(seconds, short=True):
 
 def filesize(path):
     return os.stat(path)[6]
-
-
-def from_exception(exc, txt="", sep=" "):
-    result = []
-    for frm in traceback.extract_tb(exc.__traceback__):
-        result.append("%s:%s" % (os.sep.join(frm.filename.split(os.sep)[-2:]), frm.lineno))
-    return "%s %s: %s" % (" ".join(result), name(exc), exc, )
-
-
-def savepid():
-    k = open(os.path.join(Wd.workdir, 'opr.pid'), "w", encoding='utf-8')
-    k.write(str(os.getpid()))
-    k.close()
 
 
 def locked(lock):

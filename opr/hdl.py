@@ -146,9 +146,6 @@ class Handler(Callbacks):
     def say(self, channel, txt):
         self.raw(txt)
 
-    def scan(self, mod):
-        scan(mod)
-        
     def stop(self):
         self.stopped.set()
 
