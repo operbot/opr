@@ -7,7 +7,7 @@
 import unittest
 
 
-from opr import fntime
+from opr.obj import fntime
 
 
 FN = "store/oper.evt.Event/2022-04-11/22:40:31.259218"

@@ -2,7 +2,7 @@
 # pylint: disable=R,C,W,C0302
 
 
-"event"
+"parse"
 
 
 __version__ = "1"
@@ -14,7 +14,6 @@ __version__ = "1"
 import threading
 
 
-from .hdl import Bus
 from .obj import Default
 
 
@@ -23,7 +22,6 @@ from .obj import Default
 
 def __dir__():
     return (
-            'Event',
             'Parsed',
             'parse',
            )
@@ -88,32 +86,6 @@ class Parsed(Default):
             self.txt = self.cmd + " " + self.rest
         else:
             self.txt = self.cmd
-
-
-class Event(Parsed):
-
-    def __init__(self):
-        Parsed.__init__(self)
-        self.__ready__ = threading.Event()
-        self.control = "!"
-        self.result = []
-        self.type = "event"
-
-    def bot(self):
-        return Bus.byorig(self.orig)
-
-    def ready(self):
-        self.__ready__.set()
-
-    def reply(self, txt):
-        self.result.append(txt)
-
-    def show(self):
-        for txt in self.result:
-            Bus.say(self.orig, self.channel, txt)
-
-    def wait(self):
-        self.__ready__.wait()
 
 
 ## utility

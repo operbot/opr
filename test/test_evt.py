@@ -5,10 +5,19 @@
 "event"
 
 
+__version__ = "1"
+
+
+## imports
+
+
 import unittest
 
 
 from opr import Event
+
+
+## classes
 
 
 class TestEvent(unittest.TestCase):

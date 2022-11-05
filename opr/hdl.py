@@ -26,6 +26,7 @@ import types
 import uuid
 
 
+from .bus import Bus
 from .obj import Default, Object
 from .thr import launch
 
@@ -38,13 +39,9 @@ from stat import ST_UID, ST_MODE, S_IMODE
 
 def __dir__():
     return (
-            'Bus',
             'Callbacks',
             'Command',
             'Handler',
-            'command',
-            'scan',
-            'scandir',
            )
 
 
@@ -58,36 +55,6 @@ Cfg = Default()
 
 
 ## classes
-
-
-class Bus(Object):
-
-    objs = []
-
-    @staticmethod
-    def add(obj):
-        if repr(obj) not in [repr(x) for x in Bus.objs]:
-            Bus.objs.append(obj)
-
-    @staticmethod
-    def announce(txt):
-        for obj in Bus.objs:
-            obj.announce(txt)
-
-    @staticmethod
-    def byorig(orig):
-        res = None
-        for obj in Bus.objs:
-            if repr(obj) == orig:
-                res = obj
-                break
-        return res
-
-    @staticmethod
-    def say(orig, channel, txt):
-        bot = Bus.byorig(orig)
-        if bot:
-            bot.say(channel, txt)
 
 
 class Callbacks(Object):
@@ -192,41 +159,3 @@ class Handler(Callbacks):
     def wait(self):
         while 1:
             time.sleep(1.0)
-        
-
-## utility
-
-
-def command(cli, txt):
-    evt = Event()
-    evt.parse(txt)
-    evt.orig = repr(cli)
-    cli.handle(evt)
-    return evt
-
-
-def scan(mod):
-    for _k, clz in inspect.getmembers(mod, inspect.isclass):
-        Class.add(clz)
-    for key, cmd in inspect.getmembers(mod, inspect.isfunction):
-        if key.startswith("cb"):
-            continue
-        names = cmd.__code__.co_varnames
-        if "event" in names:
-            Command.add(cmd)
-
-
-def scandir(path, func):
-    res = []
-    if not os.path.exists(path):
-        return res
-    for _fn in os.listdir(path):
-        if _fn.endswith("~") or _fn.startswith("__"):
-            continue
-        try:
-            pname = _fn.split(os.sep)[-2]
-        except IndexError:
-            pname = path
-        mname = _fn.split(os.sep)[-1][:-3]
-        res.append(func(pname, mname))
-    return res

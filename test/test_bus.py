@@ -5,10 +5,20 @@
 "bus"
 
 
+__version__ = "1"
+
+
+## imports
+
+
 import unittest
 
 
-from opr import Bus, Handler
+from opr.bus import Bus
+from opr.hdl import Handler
+
+
+## classes
 
 
 class Client(Handler):
@@ -39,9 +49,9 @@ class TestBus(unittest.TestCase):
         self.assertTrue(Client.gotcha)
 
     def test_byorig(self):
-        bus = Bus()
         clt = Client()
-        self.assertEqual(bus.byorig(repr(clt)), clt)
+        print(Bus.objs)
+        self.assertEqual(Bus.byorig(repr(clt)), clt)
 
     def test_say(self):
         bus = Bus()

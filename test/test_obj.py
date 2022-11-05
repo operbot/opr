@@ -2,22 +2,30 @@
 # pylint: disable=W0401,W0621,W0614,W1503
 
 
-"op tests"
+"object"
 
 
-import opr
+__version__ = "1"
+
+
+## imports
+
+import opr.obj
 import os
 import unittest
 import _thread
 
 
-from opr import *
+from opr.obj import *
+
+
+## defines
 
 
 Wd.workdir = ".test"
 
 
-FN = "opr.Object/c13c5369-8ada-44a9-80b3-4641986f09df/2022-04-11/22:40:31.259218"
+FN = "opr.obj.Object/c13c5369-8ada-44a9-80b3-4641986f09df/2022-04-11/22:40:31.259218"
 VALIDJSON = '{"test": "bla"}'
 
 
@@ -91,6 +99,9 @@ attrs2 = (
          )
 
 
+## classes
+
+
 class TestObject(unittest.TestCase):
 
     def setUp(self):
@@ -98,7 +109,7 @@ class TestObject(unittest.TestCase):
         save(o)
 
     def test_match(self):
-        mtc = match("opr.Object", {"txt": "test"})
+        mtc = match("opr.obj.Object", {"txt": "test"})
         self.assertTrue(not mtc)
 
     def test_find(self):
@@ -126,7 +137,7 @@ class TestObject(unittest.TestCase):
         self.assertEqual(jsn, '{"bla": "mekker"}')
 
     def test_interface(self):
-        self.assertTrue(dir(opr), attrs1)
+        self.assertTrue(dir(opr.obj), attrs1)
 
     def test_constructor(self):
         obj = Object()
@@ -195,7 +206,7 @@ class TestObject(unittest.TestCase):
 
     def test_kind(self):
         obj = Object()
-        self.assertEqual(kind(obj), "opr.Object")
+        self.assertEqual(kind(obj), "opr.obj.Object")
 
     def test_repr(self):
         self.assertTrue(update(Object(),
@@ -304,9 +315,9 @@ class TestDb(unittest.TestCase):
     def test_fns(self):
         obj = Object()
         save(obj)
-        fnms = fns("opr.Object")
+        fnms = fns("opr.obj.Object")
         if fnms:
-            self.assertTrue("opr.Object"  in fnms[0])
+            self.assertTrue("opr.obj.Object"  in fnms[0])
         self.assertTrue(True)
 
     def test_hook(self):
@@ -329,9 +340,6 @@ class Composite(Object):
     def __init__(self):
         super().__init__()
         self.dbs = Db()
-
-
-Class.add(Composite)
 
 
 class TestComposite(unittest.TestCase):
@@ -363,3 +371,9 @@ class TestJSON(unittest.TestCase):
         obj = Object()
         obj.test = "bla"
         self.assertEqual(dumps(obj), VALIDJSON)
+
+
+## runtime
+
+
+Class.add(Composite)

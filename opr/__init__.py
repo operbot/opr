@@ -1,8 +1,42 @@
 # This file is placed in the Public Domain.
 # pylint: disable=R,C,W,C0302
 
-"""object programming runtime"""
 
+"""object programming runtime
+
+
+SYNOPSIS
+
+ opr [-c] [-i] [-r]
+ opr <cmd> [key=value] [key==value]
+
+INSTAL
+
+ pip3 install opr --upgrade --force-reinstall
+
+DESCRIPTION
+
+With opr your can have the commands of a irc bot available on your cli.
+Instead of having to join a irc channel and give commands to your bot, you
+can run these commands on your shell.
+
+opr stores it's data on disk where objects are time versioned and the
+last version saved on disk is served to the user layer. Files are JSON dumps
+that are read-only so thus should provide (disk) persistence. Paths carry the
+type in the path name what makes reconstruction from filename easier then
+reading type from the object.
+
+
+AUTHOR
+
+Bart Thate
+
+
+COPYRIGHT
+
+opr is placed in the Public Domain. No Copyright, No License.
+
+"""
 
 __version__ = "104"
 
@@ -73,3 +107,4 @@ def scandir(path, func):
         mname = _fn.split(os.sep)[-1][:-3]
         res.append(func(pname, mname))
     return res
+

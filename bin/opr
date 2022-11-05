@@ -20,24 +20,18 @@ import time
 sys.path.insert(0, os.getcwd())
 
 
-from opr.evt import Event, parse
+from opr.evt import Event
 from opr.obj import Class, Object, Wd, keys, last, printable, update
 from opr.obj import find, fntime, items, save, update
+from opr.prs import parse
 from opr.hdl import Command, Handler
 from opr.utl import elapsed
 
 
 from opr import Cfg, command, scan, scandir
-from opr import cmds, irc, rss, udp 
 
 
 Wd.workdir = os.path.expanduser("~/.opr")
-
-
-scan(cmds)
-scan(irc)
-scan(rss)
-scan(udp)
 
 
 starttime = time.time()
@@ -154,14 +148,13 @@ def wrap(func):
 
 def main():
     cfg = boot()
+    scandir("mod", importer)
     if cfg.txt:
         cli = CLI()
         return command(cli, cfg.txt)
     if Cfg.console:
         banner(cfg)
-        irc.init()
-        rss.init()
-        udp.init()
+        scandir("mod", init)
         csl = Console()
         csl.start()
         csl.wait()
