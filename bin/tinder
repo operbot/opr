@@ -14,8 +14,15 @@ import traceback
 sys.path.insert(0, os.getcwd())
 
 
-from opr import Object, Wd,  elapsed, keys, name, printable
-from opr import Cfg, Command, Event, Handler, launch, parse, scandir, scan
+from opr.evt import Event
+from opr.obj import Object, Wd, keys, name, printable
+from opr.hdl import Command, Handler
+from opr.prs import parse
+from opr.thr import launch
+from opr.utl import elapsed
+
+
+from opr import Cfg, scan, scandir
 
 
 Cfg.debug = True
@@ -74,6 +81,7 @@ def consume(evts):
     fixed = []
     res = []
     for evt in evts:
+        print(evt.txt)
         evt.wait()
         fixed.append(evt)
     for fix in fixed:
@@ -112,7 +120,7 @@ def payload(cli):
             cli.put(evt)
             events.append(evt)
             nmr += 1
-
+    return nmr
 
 def wrap(func):
     fds = sys.stdin.fileno()

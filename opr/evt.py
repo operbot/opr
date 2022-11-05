@@ -30,6 +30,7 @@ class Event(Parsed):
         Parsed.__init__(self)
         self.__ready__ = threading.Event()
         self.control = "!"
+        self.errors = []
         self.result = []
         self.type = "event"
 

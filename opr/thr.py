@@ -54,8 +54,11 @@ class Thread(threading.Thread):
         if args:
             self._evt = args[0]
         self.starttime = time.time()
-        self._result = func(*args)
-
+        try:
+            self._result = func(*args)
+        except Exception as ex:
+            if self._evt:
+                self._evt.errors.append(ex)
 
 class Timer:
 
