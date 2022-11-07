@@ -20,6 +20,7 @@ def fnd(event):
     bot = event.bot()
     otype = event.args[0]
     nmr = 0
+    print(otype)
     for obj in find(otype, event.gets):
         txt = "%s %s %s" % (
                             str(nmr),
@@ -29,4 +30,4 @@ def fnd(event):
         nmr += 1
         event.reply(txt)
     if not nmr:
-        event.reply("no result")
+        event.reply("no result (%s)" % event.txt)

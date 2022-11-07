@@ -80,6 +80,14 @@ class Completer(rlcompleter.Completer):
             return None
 
 
+class Evt(Event):
+
+    def wait(self):
+        Event.wait(self)
+        if self._exc:
+            print(from_exception(self._exc))
+
+
 def banner(cfg):
     print(
           "OPR started at %s %s" % (

@@ -19,11 +19,15 @@ from opr.obj import Object, Wd, keys, name, printable, update
 from opr.hdl import Command, Handler
 from opr.prs import parse
 from opr.thr import launch
-from opr.trc import from_exception
-from opr.utl import elapsed
+from opr.utl import elapsed, from_exception
 
 
 from opr import Cfg, scan, scandir
+
+
+class OPRERR(Exception):
+
+    pass
 
 
 Cfg.debug = True
@@ -46,7 +50,7 @@ param.dne = ["test4"]
 param.dpl = ["reddit title,summary,link"]
 param.eml = ["bthate@gmail.com"]
 param.flt = ["", "0"]
-param.fnd = ["config", "rss", "log", "todo"]
+param.fnd = ["config", "rss", "log", "todo", "user"]
 param.ftc = [""]
 param.log = ["test1"]
 param.mbx = ["~/25-01-2013"]
@@ -55,12 +59,12 @@ param.mre = [""]
 param.nme = ["reddit reddit"]
 param.pwd = ["bart test"]
 param.rem = ["reddit"]
+param.rse = ["yoooo!"]
 param.rss = ["https://www.reddit.com/r/python/.rss"]
 param.sts = [""]
 param.tdo = ["test4", ""]
 param.thr = [""]
 param.upt = [""]
-
 
 
 def cprint(txt):
@@ -78,6 +82,14 @@ class CLI(Handler):
             cprint(txt)
 
 
+class Evt(Event):
+
+    def wait(self):
+        Event.wait(self)
+        if self._exc and Cfg.verbose:
+            print(from_exception(self._exc))
+
+
 def consume(evts):
     fixed = []
     res = []
@@ -92,13 +104,6 @@ def consume(evts):
     return res
 
 
-def from_exception(exc):
-    result = []
-    for frm in traceback.extract_tb(exc.__traceback__)[::-1]:
-        result.append("%s:%s" % (os.sep.join(frm.filename.split(os.sep)[-2:]), frm.lineno))
-    return "%s(%s) %s" % (name(exc), exc, " ".join(result))
-
-
 def importer(packagename, modulename):
     name = "%s.%s" % (packagename, modulename)
     try:
@@ -109,17 +114,26 @@ def importer(packagename, modulename):
 
 
 def payload(cli):
-    cmds = sorted(Command.cmd)
+    cmds = ["log", "rss", "cfg", "tdo"]
+    cmds.extend(sorted(Command.cmd))
     nmr = 0
     for cmd in cmds:
         for ex in getattr(param, cmd, [""]):
-            evt = Event()
+            evt = Evt()
             evt.txt = cmd + " " + ex
             evt.orig = repr(cli)
             cli.put(evt)
             events.append(evt)
             nmr += 1
     return nmr
+
+
+def rse(event):
+    raise OPRERR(event.txt)
+
+
+Command.add(rse)
+
 
 def wrap(func):
     fds = sys.stdin.fileno()
@@ -133,7 +147,7 @@ def wrap(func):
 
 
 def main():
-    cprint("OPERBOT tinder start at %s" % time.ctime(time.time()).replace("  ", " "))
+    cprint("OPR tinder start at %s" % time.ctime(time.time()).replace("  ", " "))
     if os.path.exists(Wd.workdir):
         shutil.rmtree(Wd.workdir)
     txt = " ".join(sys.argv[1:])
@@ -156,9 +170,9 @@ def main():
     consume(events)
     endtime = time.time()
     print("%s %s (%s remaining)" %  (
-                                        elapsed(endtime - starttime),
-                                        (endtime - starttime)/res, len(events))
-                                       )
+                                     elapsed(endtime - starttime),
+                                     (endtime - starttime)/res, len(events))
+                                    )
 
 
 wrap(main)

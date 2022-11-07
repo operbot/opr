@@ -52,7 +52,7 @@ def log(event):
     obj = Log()
     obj.txt = event.rest
     save(obj)
-    event.reply("ok")
+    event.ok()
 
 
 def tdo(event):
@@ -69,7 +69,7 @@ def tdo(event):
     obj = Todo()
     obj.txt = event.rest
     save(obj)
-    event.reply("ok")
+    event.ok()
 
 
 def thr(event):

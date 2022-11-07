@@ -16,6 +16,7 @@ import os
 import pwd
 import time
 import traceback
+import types
 
 
 from stat import ST_UID, ST_MODE, S_IMODE
@@ -72,6 +73,20 @@ def filesize(path):
     return os.stat(path)[6]
 
 
+def from_exception(exc, txt="", sep=" "):
+    """from_exception(exc, txt="", sep=" ")
+
+    return a single lined exception string
+    """
+    result = []
+    for frm in traceback.extract_tb(exc.__traceback__):
+        fnm = os.sep.join(frm.filename.split(os.sep)[-2:])
+        result.append(f"{fnm}:{frm.lineno}")
+    nme = name(exc)
+    res = sep.join(result)
+    return f"{nme} {txt} {res}: {exc.args[0]}"
+
+
 def locked(lock):
 
     noargs = False
@@ -94,6 +109,23 @@ def locked(lock):
         return lockedfunc
 
     return lockeddec
+
+
+def name(obj):
+    typ = type(obj)
+    res = None
+    if isinstance(typ, types.ModuleType):
+        res = obj.__name__
+    if "__self__" in dir(obj):
+        res =  "%s.%s" % (obj.__self__.__class__.__name__, obj.__name__)
+    if "__class__" in dir(obj) and "__name__" in dir(obj):
+        res =  "%s.%s" % (obj.__class__.__name__, obj.__name__)
+    if "__class__" in dir(obj):
+        res = obj.__class__.__name__
+    if "__name__" in dir(obj):
+        res = obj.__name__
+    if res:
+        return res.strip()
 
 
 def permission(ddir, username="opr", group="opr", umode=0o700):

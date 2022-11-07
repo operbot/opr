@@ -41,6 +41,14 @@ class Event(Parsed):
         """
         return Bus.byorig(self.orig)
 
+    def ok(self):
+        """ Event.ok()
+        
+        reply that job is done.
+        """
+        Bus.say(self.orig, self.channel, 'ok "%s"' % (self.txt))
+
+
     def ready(self):
         """Event.ready()
 

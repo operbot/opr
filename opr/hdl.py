@@ -70,8 +70,12 @@ class Callbacks(Object):
         if not func:
             event.ready()
             return
-        func(event)
-
+        try:
+            func(event)
+        except Exception as ex:
+            event._exc = ex
+            event.ready()
+            
     def dispatch(self, event):
         self.callback(event)
 

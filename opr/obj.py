@@ -342,7 +342,7 @@ class Db:
             selector = {}
         nmr = -1
         res = []
-        for fnm in fns(Wd.getpath(otp), timed):
+        for fnm in fns(otp, timed):
             obj = hook(fnm)
             if deleted and "__deleted__" in obj and obj.__deleted__:
                 continue
@@ -397,7 +397,7 @@ def fns(otp, timed=None):
                     if timed and timed.to and fntime(p) > timed.to:
                         continue
                     res.append(p)
-    return sorted(res, key=fntime)
+    return sorted(res, key=lambda x: fntime(x))
 
 def fntime(daystr):
     daystr = daystr.replace("_", ":")

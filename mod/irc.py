@@ -600,7 +600,7 @@ def cfg(event):
     else:
         edit(config, event.sets)
         save(config)
-        event.reply("ok")
+        event.ok()
 
 
 def dlt(event):
@@ -611,7 +611,7 @@ def dlt(event):
     for obj in find("user", selector):
         obj.__deleted__ = True
         save(obj)
-        event.reply("ok")
+        event.ok()
         break
 
 
@@ -631,7 +631,7 @@ def met(event):
     user.user = event.rest
     user.perms = ["USER"]
     save(user)
-    event.reply("ok")
+    event.ok()
 
 
 def mre(event):
