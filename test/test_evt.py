@@ -14,7 +14,7 @@ __version__ = "1"
 import unittest
 
 
-from opr import Event
+from opr.hdl import Event
 
 
 ## classes

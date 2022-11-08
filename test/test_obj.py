@@ -115,7 +115,7 @@ class TestObject(unittest.TestCase):
     def test_find(self):
         objs = find("object")
         if objs:
-            self.assertTrue("opr.col.Collection" in objs[0])
+            self.assertTrue("opr.obj.Object" in repr(objs[0]))
         self.assertTrue(True)
 
     def test_default(self):

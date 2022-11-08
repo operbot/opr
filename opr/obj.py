@@ -430,6 +430,7 @@ def find(otp, selector=None, index=None, timed=None, deleted=False):
     if not names:
         names = Wd.types(otp)
     result = []
+    print(names)
     for nme in names:
         res = Db.find(nme, selector, index, timed, deleted)
         result.extend(res)
