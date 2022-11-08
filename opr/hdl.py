@@ -26,35 +26,131 @@ import types
 import uuid
 
 
-from .bus import Bus
-from .obj import Default, Object
-from .thr import launch
-
-
 from stat import ST_UID, ST_MODE, S_IMODE
 
 
-## defines
-
-
-def __dir__():
-    return (
-            'Callbacks',
-            'Command',
-            'Handler',
-           )
-
-
-__all__ = __dir__()
-
-
-## defines
-
-
-Cfg = Default()
+from .obj import Default, Object, register
+from .thr import launch
 
 
 ## classes
+
+
+class Bus(Object):
+
+    objs = []
+
+    @staticmethod
+    def add(obj):
+        if repr(obj) not in [repr(x) for x in Bus.objs]:
+            Bus.objs.append(obj)
+
+    @staticmethod
+    def announce(txt):
+        for obj in Bus.objs:
+            obj.announce(txt)
+
+    @staticmethod
+    def byorig(orig):
+        res = None
+        for obj in Bus.objs:
+            if repr(obj) == orig:
+                res = obj
+                break
+        return res
+
+    @staticmethod
+    def say(orig, channel, txt):
+        bot = Bus.byorig(orig)
+        if bot:
+            bot.say(channel, txt)
+
+
+class Parsed(Default):
+
+    def __init__(self):
+        Default.__init__(self)
+        self.args = []
+        self.gets = Default()
+        self.isparsed = False
+        self.sets = Default()
+        self.toskip = Default()
+        self.txt = ""
+
+    def default(self, key, default=""):
+        register(self, key, default)
+
+    def parse(self, txt=None):
+        self.isparsed = True
+        self.otxt = txt or self.txt
+        spl = self.otxt.split()
+        args = []
+        _nr = -1
+        for word in spl:
+            if word.startswith("-"):
+                try:
+                    self.index = int(word[1:])
+                except ValueError:
+                    self.opts = self.opts + word[1:2]
+                continue
+            try:
+                key, value = word.split("==")
+                if value.endswith("-"):
+                    value = value[:-1]
+                    register(self.toskip, value, "")
+                register(self.gets, key, value)
+                continue
+            except ValueError:
+                pass
+            try:
+                key, value = word.split("=")
+                register(self.sets, key, value)
+                continue
+            except ValueError:
+                pass
+            _nr += 1
+            if _nr == 0:
+                self.cmd = word
+                continue
+            args.append(word)
+        if args:
+            self.args = args
+            self.rest = " ".join(args)
+            self.txt = self.cmd + " " + self.rest
+        else:
+            self.txt = self.cmd
+
+
+class Event(Parsed):
+
+
+    def __init__(self):
+        Parsed.__init__(self)
+        self.__ready__ = threading.Event()
+        self.control = "!"
+        self.errors = []
+        self.result = []
+        self.type = "event"
+
+    def bot(self):
+        return Bus.byorig(self.orig)
+
+    def ok(self):
+        Bus.say(self.orig, self.channel, 'ok "%s"' % (self.txt))
+
+
+    def ready(self):
+        self.__ready__.set()
+
+    def reply(self, txt):
+        self.result.append(txt)
+
+    def show(self):
+        for txt in self.result:
+            Bus.say(self.orig, self.channel, txt)
+
+    def wait(self):
+        self.__ready__.wait()
 
 
 class Callbacks(Object):
@@ -160,3 +256,17 @@ class Handler(Callbacks):
     def wait(self):
         while 1:
             time.sleep(1.0)
+
+
+## utility
+
+
+def parse(txt):
+    prs = Parsed()
+    prs.parse(txt)
+    if "c" in prs.opts:
+        prs.console = True
+    if "v" in prs.opts:
+        prs.verbose = True
+    return prs
+

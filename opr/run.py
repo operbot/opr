@@ -46,17 +46,19 @@ __version__ = "104"
 
 import inspect
 import os
+import traceback
 
 
-from .obj import Class, Default, Wd
-from .evt import Event
-from .hdl import Command
+from .obj import Class, Default, Wd, name
+from .hdl import Command, Event
+from .thr import launch
 
 
 def __dir__():
     return (
             'Cfg',
             'command',
+            'launch',
             'scan',
             'scandir',
            )
@@ -114,3 +116,20 @@ def scandir(path, func):
         res.append(func(pname, mname))
     return res
 
+
+
+## utility
+
+
+def from_exception(exc, txt="", sep=" "):
+    """from_exception(exc, txt="", sep=" ")
+
+    return a single lined exception string
+    """
+    result = []
+    for frm in traceback.extract_tb(exc.__traceback__):
+        fnm = os.sep.join(frm.filename.split(os.sep)[-2:])
+        result.append(f"{fnm}:{frm.lineno}")
+    nme = name(exc)
+    res = sep.join(result)
+    return f"{txt} {res} {nme}: {exc}"

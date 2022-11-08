@@ -20,15 +20,11 @@ import time
 sys.path.insert(0, os.getcwd())
 
 
-from opr.evt import Event
+from opr.hdl import Command, Event, Handler, parse
 from opr.obj import Class, Object, Wd, keys, last, printable, update
 from opr.obj import find, fntime, items, save, update
-from opr.prs import parse
-from opr.hdl import Command, Handler
+from opr.run import Cfg, command, scan, scandir
 from opr.utl import elapsed
-
-
-from opr import Cfg, command, scan, scandir
 
 
 Wd.workdir = os.path.expanduser("~/.opr")

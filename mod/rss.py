@@ -20,11 +20,11 @@ from opr.obj import Class, Db, Default, Object
 from opr.obj import find, fntime, items, last, printable, save
 from opr.obj import edit, register, update, values
 from opr.hdl import Bus
+from opr.run import Cfg
 from opr.thr import Repeater, launch
 from opr.utl import elapsed, spl
 
 
-from opr import Cfg
 
 
 def __dir__():
