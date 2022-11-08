@@ -14,15 +14,13 @@ import traceback
 sys.path.insert(0, os.getcwd())
 
 
-from opr.evt import Event
 from opr.obj import Object, Wd, keys, name, printable, update
-from opr.hdl import Command, Handler
-from opr.prs import parse
+from opr.hdl import Callback, Command, Event, Handler, parse
+from opr.run import Cfg, scan, scandir, from_exception
 from opr.thr import launch
-from opr.utl import elapsed, from_exception
+from opr.utl import elapsed
 
 
-from opr import Cfg, scan, scandir
 
 
 class OPRERR(Exception):
@@ -87,7 +85,7 @@ class Evt(Event):
     def wait(self):
         Event.wait(self)
         if self._exc and Cfg.verbose:
-            print(from_exception(self._exc))
+            cprint(from_exception(self._exc))
 
 
 def consume(evts):
@@ -110,7 +108,7 @@ def importer(packagename, modulename):
         mod = importlib.import_module(name, packagename)
         scan(mod)
     except Exception as ex:
-        print(from_exception(ex))
+        cprint(from_exception(ex))
 
 
 def payload(cli):
@@ -144,6 +142,9 @@ def wrap(func):
         cprint("")
     finally:
         termios.tcsetattr(fds, termios.TCSADRAIN, old)
+        if Cfg.verbose:
+            for err in Callback.errors:
+                cprint(from_exception(err))
 
 
 def main():
@@ -155,23 +156,24 @@ def main():
     update(Cfg, cfg)
     cprint(printable(Cfg, keys(Cfg)))
     scandir("mod", importer)
-    print("commands: " +  ",".join(sorted(Command.cmd)))
+    cprint("commands: " +  ",".join(sorted(Command.cmd)))
     cli = CLI()
     cli.start()
     nrs = cfg.index or 20
     res = 1
     thrs = []
     starttime = time.time()
-    print(f"index is {nrs}")
     for nmr in range(nrs):
         thrs.append(launch(payload, cli))
     for thr in thrs:
         thr.join()
     consume(events)
     endtime = time.time()
-    print("%s %s (%s remaining)" %  (
+    cprint("%s elapsed %s middled %s remaining %s" %  (
+                                     printable(Cfg, keys(Cfg)),
                                      elapsed(endtime - starttime),
-                                     (endtime - starttime)/res, len(events))
+                                     (endtime - starttime)/res,
+                                     len(events))
                                     )
 
 

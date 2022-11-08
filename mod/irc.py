@@ -33,7 +33,6 @@ saylock = _thread.allocate_lock()
 def init():
     irc = IRC()
     irc.start()
-    print(printable(irc.cfg, "nick,channel,server,port,sasl"))
     return irc
 
 

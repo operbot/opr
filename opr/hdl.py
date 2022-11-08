@@ -31,6 +31,7 @@ from stat import ST_UID, ST_MODE, S_IMODE
 
 from .obj import Default, Object, register
 from .thr import launch
+from. utl import elapsed
 
 
 ## classes
@@ -128,16 +129,20 @@ class Event(Parsed):
         Parsed.__init__(self)
         self.__ready__ = threading.Event()
         self.control = "!"
+        self.createtime = time.time()
         self.errors = []
         self.result = []
+        self.txt = ""
         self.type = "event"
 
     def bot(self):
         return Bus.byorig(self.orig)
 
-    def ok(self):
-        Bus.say(self.orig, self.channel, 'ok "%s"' % (self.txt))
+    def error(self):
+        pass
 
+    def ok(self):
+        Bus.say(self.orig, self.channel, 'ok %s' % elapsed(time.time()-self.createtime))
 
     def ready(self):
         self.__ready__.set()
@@ -153,10 +158,11 @@ class Event(Parsed):
         self.__ready__.wait()
 
 
-class Callbacks(Object):
+class Callback(Object):
 
     cbs = Object()
-
+    errors = []
+    
     def register(self, typ, cbs):
         if typ not in self.cbs:
             setattr(self.cbs, typ, cbs)
@@ -169,6 +175,7 @@ class Callbacks(Object):
         try:
             func(event)
         except Exception as ex:
+            Callback.errors.append(ex)
             event._exc = ex
             event.ready()
             
@@ -206,10 +213,10 @@ class Command(Object):
         delattr(Command.cmd, cmd)
 
 
-class Handler(Callbacks):
+class Handler(Callback):
 
     def __init__(self):
-        Callbacks.__init__(self)
+        Callback.__init__(self)
         self.queue = queue.Queue()
         self.stopped = threading.Event()
         self.stopped.clear()

@@ -24,10 +24,10 @@ import time
 sys.path.insert(0, os.getcwd())
 
 
-from opr.hdl import Command, Event, Handler, parse
+from opr.hdl import Callback, Command, Event, Handler, parse
 from opr.obj import Class, Object, Wd, keys, last, printable, update
 from opr.obj import find, fntime, items, save, update
-from opr.run import Cfg, command, scan, scandir
+from opr.run import Cfg, command, scan, scandir, from_exception
 from opr.utl import elapsed
 
 
@@ -35,6 +35,11 @@ Wd.workdir = os.path.expanduser("~/.opr")
 
 
 starttime = time.time()
+
+
+def cprint(txt):
+    print(txt)
+    sys.stdout.flush()
 
 
 class CLI(Handler):
@@ -45,7 +50,7 @@ class CLI(Handler):
 
     @staticmethod
     def raw(txt):
-        print(txt)
+        cprint(txt)
 
 
 class Console(CLI):
@@ -85,14 +90,14 @@ class Evt(Event):
     def wait(self):
         Event.wait(self)
         if self._exc:
-            print(from_exception(self._exc))
+            cprint(from_exception(self._exc))
 
 
 def banner(cfg):
-    print(
+    cprint(
           "OPR started at %s %s" % (
                                      time.ctime(time.time()).replace("  ", " "),
-                                     printable(cfg, "debug,verbose")
+                                     cprintable(cfg, "debug,verbose")
                                     )
          )
 
@@ -107,7 +112,7 @@ def boot():
 
 
 def hup(_sig, _frame):
-    print("signal 15 called")
+    cprint("signal 15 called")
     sys.stdout.flush()
 
 
@@ -152,10 +157,12 @@ def wrap(func):
     try:
         func()
     except (EOFError, KeyboardInterrupt):
-        print("")
+        cprint("")
     finally:
         if gotterm:
             termios.tcsetattr(fds, termios.TCSADRAIN, old)
+    for err in Callback.errors:
+        cprint(from_exception(err))
 
 
 def main():

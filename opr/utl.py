@@ -32,6 +32,7 @@ def debian():
 def elapsed(seconds, short=True):
     txt = ""
     nsec = float(seconds)
+    remainder = str(nsec).split(".")[-1][-4:]
     year = 365*24*60*60
     week = 7*24*60*60
     nday = 24*60*60
@@ -53,38 +54,19 @@ def elapsed(seconds, short=True):
         nrdays += weeks * 7
     if nrdays:
         txt += "%sd" % nrdays
-    if years and short and txt:
-        return txt
+    #if years and short and txt:
+    #    return txt
     if hours:
         txt += "%sh" % hours
-    if nrdays and short and txt:
-        return txt
     if minutes:
         txt += "%sm" % minutes
-    if hours and short and txt:
-        return txt
-    if sec != 0:
-        txt += "%ss" % int(sec)
+    txt = txt + "0.%ss" % remainder
     txt = txt.strip()
     return txt
 
 
 def filesize(path):
     return os.stat(path)[6]
-
-
-def from_exception(exc, txt="", sep=" "):
-    """from_exception(exc, txt="", sep=" ")
-
-    return a single lined exception string
-    """
-    result = []
-    for frm in traceback.extract_tb(exc.__traceback__):
-        fnm = os.sep.join(frm.filename.split(os.sep)[-2:])
-        result.append(f"{fnm}:{frm.lineno}")
-    nme = name(exc)
-    res = sep.join(result)
-    return f"{nme} {txt} {res}: {exc.args[0]}"
 
 
 def locked(lock):

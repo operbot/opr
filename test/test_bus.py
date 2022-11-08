@@ -50,7 +50,6 @@ class TestBus(unittest.TestCase):
 
     def test_byorig(self):
         clt = Client()
-        print(Bus.objs)
         self.assertEqual(Bus.byorig(repr(clt)), clt)
 
     def test_say(self):
