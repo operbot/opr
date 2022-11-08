@@ -2,7 +2,11 @@
 # This file is placed in the Public Domain.
 # pylint: disable=R,C,W,C0302
 
-"""object programming runtime"""
+
+"object programming runtime"
+
+
+__version__ = "3"
 
 
 import atexit
@@ -133,6 +137,10 @@ def setcompleter(optionlist):
     atexit.register(lambda: readline.set_completer(None))
 
 
+def ver(event):
+    event.reply("OPR %s" % __version__)
+
+
 def wrap(func):
     fds = sys.stdin.fileno()
     gotterm = True
@@ -153,6 +161,7 @@ def wrap(func):
 def main():
     cfg = boot()
     scandir("mod", importer)
+    Command.add(ver)
     if cfg.txt:
         cli = CLI()
         return command(cli, cfg.txt)

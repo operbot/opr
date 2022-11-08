@@ -38,6 +38,7 @@ opr is placed in the Public Domain. No Copyright, No License.
 
 """
 
+
 __version__ = "104"
 
 
@@ -76,12 +77,22 @@ Cfg = Default()
 ## utility
 
 
-def command(cli, txt):
-    evt = Event()
+def command(cli, txt, event=None):
+    evt = event and event() or Event()
     evt.parse(txt)
     evt.orig = repr(cli)
     cli.handle(evt)
     return evt
+
+
+def from_exception(exc, txt="", sep=" "):
+    result = []
+    for frm in traceback.extract_tb(exc.__traceback__):
+        fnm = os.sep.join(frm.filename.split(os.sep)[-2:])
+        result.append(f"{fnm}:{frm.lineno}")
+    nme = name(exc)
+    res = sep.join(result)
+    return f"{txt} {res} {nme}: {exc}"
 
 
 def savepid():
@@ -115,21 +126,3 @@ def scandir(path, func):
         mname = _fn.split(os.sep)[-1][:-3]
         res.append(func(pname, mname))
     return res
-
-
-
-## utility
-
-
-def from_exception(exc, txt="", sep=" "):
-    """from_exception(exc, txt="", sep=" ")
-
-    return a single lined exception string
-    """
-    result = []
-    for frm in traceback.extract_tb(exc.__traceback__):
-        fnm = os.sep.join(frm.filename.split(os.sep)[-2:])
-        result.append(f"{fnm}:{frm.lineno}")
-    nme = name(exc)
-    res = sep.join(result)
-    return f"{txt} {res} {nme}: {exc}"
