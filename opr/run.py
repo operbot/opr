@@ -1,88 +1,101 @@
 # This file is placed in the Public Domain.
-# pylint: disable=R,C,W,C0302
+# pylint: disable=C0115,C0116,C0209,W0212,W1514,R1732
+
+"runtime"
 
 
-"""object programming runtime
+## import
 
 
-SYNOPSIS
-
- opr [-c] [-i] [-r]
- opr <cmd> [key=value] [key==value]
-
-INSTAL
-
- pip3 install opr --upgrade --force-reinstall
-
-DESCRIPTION
-
-With opr your can have the commands of a irc bot available on your cli.
-Instead of having to join a irc channel and give commands to your bot, you
-can run these commands on your shell.
-
-opr stores it's data on disk where objects are time versioned and the
-last version saved on disk is served to the user layer. Files are JSON dumps
-that are read-only so thus should provide (disk) persistence. Paths carry the
-type in the path name what makes reconstruction from filename easier then
-reading type from the object.
-
-
-AUTHOR
-
-Bart Thate
-
-
-COPYRIGHT
-
-opr is placed in the Public Domain. No Copyright, No License.
-
-"""
-
-
-__version__ = "104"
-
-
-## imports
-
-
-import inspect
+import atexit
 import os
-import traceback
+import readline
+import rlcompleter
+import sys
+import termios
+import time
 
 
-from .obj import Class, Default, Wd, name
-from .hdl import Command, Event
-from .thr import launch
+from .obj import Default, keys, update
+from .hdl import Command, parse
+from .thr import name
+
+
+## define
+
+
+Cfg = Default()
 
 
 def __dir__():
     return (
-            'Cfg',
-            'command',
-            'launch',
-            'scan',
-            'scandir',
+            "banner",
+            "daemon",
+            'from_exception',
+            "setcompleter",
+            "wrap"
            )
 
 
 __all__ = __dir__()
 
 
-## defines
+## class
 
 
-Cfg = Default()
+class Completer(rlcompleter.Completer):
+
+    def __init__(self, options):
+        super().__init__()
+        self.matches = []
+        self.options = options
+
+    def complete(self, text, state):
+        if state == 0:
+            if text:
+                self.matches = [s for s in self.options if s and s.startswith(text)]
+            else:
+                self.matches = self.options[:]
+        try:
+            return self.matches[state]
+        except IndexError:
+            return None
 
 
 ## utility
 
 
-def command(cli, txt, event=None):
-    evt = event and event() or Event()
-    evt.parse(txt)
-    evt.orig = repr(cli)
-    cli.handle(evt)
-    return evt
+def banner(name):
+    print(
+          "%s started at %s" % (
+                                name.upper(),
+                                time.ctime(time.time()).replace("  ", " "),
+                               )
+         )
+
+
+def boot(name):
+    setcompleter(keys(Command.cmd))
+    txt = ' '.join(sys.argv[1:])
+    cfg = parse(txt)
+    update(Cfg, cfg)
+    banner(name)
+    return cfg
+
+
+def daemon(silent=False):
+    pid = os.fork()
+    if pid != 0:
+        os._exit(0)
+    os.setsid()
+    os.umask(0)
+    sis = open("/dev/null", 'r')
+    os.dup2(sis.fileno(), sys.stdin.fileno())
+    if silent:
+        sos = open("/dev/null", 'a+')
+        ses = open("/dev/null", 'a+')
+        os.dup2(sos.fileno(), sys.stdout.fileno())
+        os.dup2(ses.fileno(), sys.stderr.fileno())
 
 
 def from_exception(exc, txt="", sep=" "):
@@ -95,34 +108,26 @@ def from_exception(exc, txt="", sep=" "):
     return f"{txt} {res} {nme}: {exc}"
 
 
-def savepid():
-    k = open(os.path.join(Wd.workdir, 'opr.pid'), "w", encoding='utf-8')
-    k.write(str(os.getpid()))
-    k.close()
+def setcompleter(optionlist):
+    completer = Completer(optionlist)
+    readline.set_completer(completer.complete)
+    readline.parse_and_bind("tab: complete")
+    atexit.register(lambda: readline.set_completer(None))
 
 
-def scan(mod):
-    for _k, clz in inspect.getmembers(mod, inspect.isclass):
-        Class.add(clz)
-    for key, cmd in inspect.getmembers(mod, inspect.isfunction):
-        if key.startswith("cb"):
-            continue
-        names = cmd.__code__.co_varnames
-        if "event" in names:
-            Command.add(cmd)
+def wrap(func):
+    fds = sys.stdin.fileno()
+    gotterm = True
+    try:
+        old = termios.tcgetattr(fds)
+    except termios.error:
+        gotterm = False
+    readline.redisplay()
+    try:
+        func()
+    except (EOFError, KeyboardInterrupt):
+        print("")
+    finally:
+        if gotterm:
+            termios.tcsetattr(fds, termios.TCSADRAIN, old)
 
-
-def scandir(path, func):
-    res = []
-    if not os.path.exists(path):
-        return res
-    for _fn in os.listdir(path):
-        if _fn.endswith("~") or _fn.startswith("__"):
-            continue
-        try:
-            pname = _fn.split(os.sep)[-2]
-        except IndexError:
-            pname = path
-        mname = _fn.split(os.sep)[-1][:-3]
-        res.append(func(pname, mname))
-    return res

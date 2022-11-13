@@ -1,0 +1,71 @@
+#!/usr/bin/env python3
+# This file is placed in the Public Domain.
+
+
+"all"
+
+
+import os
+import time
+
+
+starttime = time.time()
+
+
+def elapsed(seconds, short=True):
+    txt = ""
+    nsec = float(seconds)
+    if nsec < 1:
+        return f"{nsec:.2f}s"
+    year = 365*24*60*60
+    week = 7*24*60*60
+    nday = 24*60*60
+    hour = 60*60
+    minute = 60
+    years = int(nsec/year)
+    nsec -= years*year
+    weeks = int(nsec/week)
+    nsec -= weeks*week
+    nrdays = int(nsec/nday)
+    nsec -= nrdays*nday
+    hours = int(nsec/hour)
+    nsec -= hours*hour
+    minutes = int(nsec/minute)
+    nsec -= int(minute*minutes)
+    sec = int(nsec)
+    if years:
+        txt += "%sy" % years
+    if weeks:
+        nrdays += weeks * 7
+    if nrdays:
+        txt += "%sd" % nrdays
+    if years and short and txt:
+        return txt.strip()
+    if hours:
+        txt += "%sh" % hours
+    if minutes:
+        txt += "%sm" % minutes
+    if sec:
+        txt += "%ss" % sec
+    txt = txt.strip()
+    return txt
+
+
+
+def popen(txt):
+    for line in os.popen(txt).readlines():
+        print(line.strip())
+
+
+print("FIN started at %s" % time.ctime(time.time()).replace("  ", " "))
+print("\ncleaning\n")
+popen("fin/clean")
+print("\nbuilding\n")
+popen("fin/build")
+print("\nlinting\n")
+popen("fin/lint")
+print("\ntesting\n")
+popen("fin/test")
+print("\ncreating environment\n")
+popen("fin/env")
+print("\ndone %s" % elapsed(time.time() - starttime))

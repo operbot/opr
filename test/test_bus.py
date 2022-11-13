@@ -24,9 +24,8 @@ class Client(Handler):
 
     gotcha = False
 
-    def announce(self, txt):
+    def raw(self, txt):
         Client.gotcha = True
-
 
 class TestBus(unittest.TestCase):
 

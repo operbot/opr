@@ -1,0 +1,34 @@
+#!/usr/bin/env python3
+# This file is placed in the Public Domain.
+
+
+"env"
+
+
+## import
+
+
+import os
+
+
+## utility
+
+
+def popen(txt):
+    "run command"
+    for line in os.popen(txt).readlines():
+        print(line.strip())
+
+
+## runtime
+
+
+name = os.getcwd()
+
+
+if not os.path.exists("dist"):
+    popen("fin/build")
+
+
+popen("python3 -mvirtualenv --system-site-packages env")
+popen("env/bin/pip3 install %s -f dist --upgrade --force-reinstall --no-cache-dir --no-deps" % name)

@@ -5,21 +5,37 @@
 "utility"
 
 
-__version__ = "1"
-
-
-## imports
+## import
 
 
 import getpass
 import os
 import pwd
 import time
-import traceback
 import types
 
 
 from stat import ST_UID, ST_MODE, S_IMODE
+
+
+## define
+
+
+def __dir__():
+    return (
+            'debian',
+            'elapsed',
+            'filesize',
+            'locked',
+            'permission',
+            'spl',
+            'touch',
+            'user',
+            'wait'
+           ) 
+
+
+__all__ = __dir__()
 
 
 ## utility
@@ -32,7 +48,8 @@ def debian():
 def elapsed(seconds, short=True):
     txt = ""
     nsec = float(seconds)
-    remainder = str(nsec).split(".")[-1][-4:]
+    if nsec < 1:
+        return f"{nsec:.2f}s"
     year = 365*24*60*60
     week = 7*24*60*60
     nday = 24*60*60
@@ -47,20 +64,22 @@ def elapsed(seconds, short=True):
     hours = int(nsec/hour)
     nsec -= hours*hour
     minutes = int(nsec/minute)
-    sec = nsec - minutes*minute
+    nsec -= int(minute*minutes)
+    sec = int(nsec)
     if years:
         txt += "%sy" % years
     if weeks:
         nrdays += weeks * 7
     if nrdays:
         txt += "%sd" % nrdays
-    #if years and short and txt:
-    #    return txt
+    if years and short and txt:
+        return txt.strip()
     if hours:
         txt += "%sh" % hours
     if minutes:
         txt += "%sm" % minutes
-    txt = txt + "0.%ss" % remainder
+    if sec:
+        txt += "%ss" % sec
     txt = txt.strip()
     return txt
 
@@ -93,24 +112,8 @@ def locked(lock):
     return lockeddec
 
 
-def name(obj):
-    typ = type(obj)
-    res = None
-    if isinstance(typ, types.ModuleType):
-        res = obj.__name__
-    if "__self__" in dir(obj):
-        res =  "%s.%s" % (obj.__self__.__class__.__name__, obj.__name__)
-    if "__class__" in dir(obj) and "__name__" in dir(obj):
-        res =  "%s.%s" % (obj.__class__.__name__, obj.__name__)
-    if "__class__" in dir(obj):
-        res = obj.__class__.__name__
-    if "__name__" in dir(obj):
-        res = obj.__name__
-    if res:
-        return res.strip()
-
-
-def permission(ddir, username="opr", group="opr", umode=0o700):
+def permission(ddir, username, group=None, umode=0o700):
+    group = group or username
     try:
         pwdline = pwd.getpwnam(username)
         uid = pwdline.pw_uid

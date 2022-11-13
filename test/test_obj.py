@@ -16,7 +16,7 @@ import unittest
 import _thread
 
 
-from opr.obj import *
+from opr import *
 
 
 ## defines
@@ -346,7 +346,7 @@ class TestComposite(unittest.TestCase):
 
     def test_composite(self):
         composite = Composite()
-        path = dump(composite, os.path.join(Wd.workdir, "compositetest"))
+        path = write(composite, os.path.join(Wd.workdir, "compositetest"))
         composite2 = Composite()
         load(composite2, path)
         self.assertEqual(type(composite2.dbs), Db)
