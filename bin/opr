@@ -97,7 +97,7 @@ def banner(cfg):
     cprint(
           "OPR started at %s %s" % (
                                      time.ctime(time.time()).replace("  ", " "),
-                                     cprintable(cfg, "debug,verbose")
+                                     printable(cfg, "debug,verbose")
                                     )
          )
 
