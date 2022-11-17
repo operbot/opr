@@ -1,4 +1,5 @@
 # This file is placed in the Public Domain.
+# pylint: disable=E1101,C0115,C0116,R0903,C0209
 
 
 "commands"
@@ -8,12 +9,26 @@ import threading
 import time
 
 
-from opr.hdl import Command
-from opr.obj import Class, Object, find, fntime, items, save, update
-from opr.utl import elapsed
+from .hdl import Bus, Command
+from .obj import Class, Object, find, fntime, save, update
+from .thr import name
+from .utl import elapsed
 
 
 starttime = time.time()
+
+
+def __dir__():
+    return (
+            'Log',
+            'Todo',
+            'cmd',
+            'flt',
+            'log',
+            'tdo',
+            'thr',
+            'upt'
+           )
 
 
 class Log(Object):
@@ -38,6 +53,16 @@ def cmd(event):
     event.reply(",".join(sorted(Command.cmd)))
 
 
+def flt(event):
+    try:
+        index = int(event.args[0])
+        event.reply(Bus.objs[index])
+        return
+    except (KeyError, TypeError, IndexError, ValueError):
+        pass
+    event.reply(" | ".join([name(o) for o in Bus.objs]))
+
+
 def log(event):
     if not event.rest:
         nmr = 0
@@ -52,7 +77,7 @@ def log(event):
     obj = Log()
     obj.txt = event.rest
     save(obj)
-    event.ok()
+    event.done()
 
 
 def tdo(event):
@@ -69,7 +94,7 @@ def tdo(event):
     obj = Todo()
     obj.txt = event.rest
     save(obj)
-    event.ok()
+    event.done()
 
 
 def thr(event):

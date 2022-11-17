@@ -1,4 +1,5 @@
 # This file is placed in the Public Domain.
+# pylint: disable=C0115,C0116,R0903,C0209,R1732
 
 
 "rich site syndicate"
@@ -9,6 +10,7 @@ import re
 import threading
 import time
 import urllib
+import _thread
 
 
 from urllib.error import HTTPError, URLError
@@ -16,15 +18,12 @@ from urllib.parse import quote_plus, urlencode
 from urllib.request import Request, urlopen
 
 
-from opr.obj import Class, Db, Default, Object
-from opr.obj import find, fntime, items, last, printable, save
-from opr.obj import edit, register, update, values
-from opr.hdl import Bus
-from opr.run import Cfg
-from opr.thr import Repeater, launch
-from opr.utl import elapsed, spl
-
-
+from .obj import Class, Db, Default, Object, write
+from .obj import find, fntime, last, printable, save
+from .obj import edit, locked, register, update
+from .hdl import Bus, Cfg, Command
+from .thr import Repeater, launch
+from .utl import elapsed, spl
 
 
 def __dir__():
@@ -35,6 +34,7 @@ def __dir__():
         "Seen",
         "debug",
         "init",
+        "cmd",
         "dpl",
         "ftc",
         "nme",
@@ -48,6 +48,9 @@ def init():
     fetcher = Fetcher()
     fetcher.start()
     return fetcher
+
+
+fetchlock = _thread.allocate_lock()
 
 
 class Feed(Default):
@@ -101,10 +104,12 @@ class Fetcher(Object):
             result += " - "
         return result[:-2].rstrip()
 
+    @locked(fetchlock)
     def fetch(self, feed):
         counter = 0
         objs = []
-        for obj in reversed(list(getfeed(feed.rss, feed.display_list))):
+        res = reversed(list(getfeed(feed.rss, feed.display_list)))
+        for obj in res:
             fed = Feed()
             update(fed, obj)
             update(fed, feed)
@@ -122,7 +127,7 @@ class Fetcher(Object):
                 save(fed)
             objs.append(fed)
         if objs:
-            save(Fetcher.seen)
+            write(Fetcher.seen)
         txt = ""
         name = getattr(feed, "name")
         if name:
@@ -228,6 +233,10 @@ def useragent(txt):
     return "Mozilla/5.0 (X11; Linux x86_64) " + txt
 
 
+def cmd(event):
+    event.reply(",".join(sorted(Command.cmd)))
+
+
 def dpl(event):
     if len(event.args) < 2:
         event.reply("dpl <stringinurl> <item1,item2>")
@@ -239,13 +248,10 @@ def dpl(event):
         if feed:
             edit(feed, setter)
             save(feed)
-            event.ok()
+            event.done()
 
 
 def ftc(event):
-    if Cfg.debug:
-        event.reply("not fetching, debug is enabled")
-        return
     res = []
     thrs = []
     fetcher = Fetcher()
@@ -269,7 +275,7 @@ def nme(event):
         got.append(feed)
     for feed in got:
         save(feed)
-    event.ok()
+    event.done()
 
 
 def rem(event):
@@ -280,7 +286,7 @@ def rem(event):
     for feed in find("rss", selector):
         feed.__deleted__ = True
         save(feed)
-    event.ok()
+    event.done()
 
 
 def rss(event):
@@ -307,4 +313,4 @@ def rss(event):
     feed = Rss()
     feed.rss = event.args[0]
     save(feed)
-    event.ok()
+    event.done()
