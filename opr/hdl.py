@@ -1,11 +1,8 @@
 # This file is placed in the Public Domain.
-# pylint: disable=C0115,C0116,W0703,W0201,R0902,R0903,W0613
+# pylint: disable=C0115,C0116,W0703,W0201,R0902,R0903,W0613,R0201
 
 
 "handler"
-
-
-## import
 
 
 import inspect
@@ -15,12 +12,9 @@ import threading
 import time
 
 
-from .obj import Class, Default, Object, register
+from .obj import Class, Default, Object, register, update
 from .thr import launch
 from .utl import elapsed
-
-
-## define
 
 
 def __dir__():
@@ -34,7 +28,6 @@ def __dir__():
             'command',
             'parse',
             'scan',
-            'scancls',
             'scandir'
            )
 
@@ -42,7 +35,7 @@ def __dir__():
 __all__ = __dir__()
 
 
-## class
+Cfg = Default()
 
 
 class Bus(Object):
@@ -90,7 +83,7 @@ class Callback(Object):
             event.ready()
             return
         try:
-            func(event)
+            event.__thr__ = launch(func, event)
         except Exception as ex:
             Callback.errors.append(ex)
             event.ready()
@@ -127,6 +120,58 @@ class Command(Object):
     @staticmethod
     def remove(cmd):
         delattr(Command.cmd, cmd)
+
+
+class Handler(Callback):
+
+    def __init__(self):
+        Callback.__init__(self)
+        self.queue = queue.Queue()
+        self.stopped = threading.Event()
+        self.stopped.clear()
+        self.register("event", Command.handle)
+        Bus.add(self)
+
+    @staticmethod
+    def add(cmd):
+        Command.add(cmd)
+
+    def announce(self, txt):
+        self.raw(txt)
+
+    def handle(self, event):
+        self.dispatch(event)
+
+    def loop(self):
+        while not self.stopped.set():
+            self.handle(self.poll())
+
+    def poll(self):
+        return self.queue.get()
+
+    def put(self, event):
+        self.queue.put_nowait(event)
+
+    def raw(self, txt):
+        raise NotImplementedError("raw")
+
+    def restart(self):
+        self.stop()
+        self.start()
+
+    def say(self, channel, txt):
+        self.raw(txt)
+
+    def stop(self):
+        self.stopped.set()
+
+    def start(self):
+        self.stopped.clear()
+        launch(self.loop)
+
+    def wait(self):
+        while 1:
+            time.sleep(1.0)
 
 
 class Parsed(Default):
@@ -187,6 +232,7 @@ class Event(Parsed):
     def __init__(self):
         Parsed.__init__(self)
         self.__ready__ = threading.Event()
+        self.__thr__ = None
         self.control = "!"
         self.createtime = time.time()
         self.result = []
@@ -213,66 +259,13 @@ class Event(Parsed):
             Bus.say(self.orig, self.channel, txt)
 
     def wait(self):
+        for thr in self._thrs:
+            thr.join()
         self.__ready__.wait()
 
 
-class Handler(Callback):
-
-    def __init__(self):
-        Callback.__init__(self)
-        self.queue = queue.Queue()
-        self.stopped = threading.Event()
-        self.stopped.clear()
-        self.register("event", Command.handle)
-        Bus.add(self)
-
-    @staticmethod
-    def add(cmd):
-        Command.add(cmd)
-
-    def announce(self, txt):
-        self.raw(txt)
-
-    def handle(self, event):
-        self.dispatch(event)
-
-    def loop(self):
-        while not self.stopped.set():
-            self.handle(self.poll())
-
-    def poll(self):
-        return self.queue.get()
-
-    def put(self, event):
-        self.queue.put_nowait(event)
-
-    def raw(self, txt):
-        raise NotImplementedError("raw")
-
-    def restart(self):
-        self.stop()
-        self.start()
-
-    def say(self, channel, txt):
-        self.raw(txt)
-
-    def stop(self):
-        self.stopped.set()
-
-    def start(self):
-        self.stopped.clear()
-        launch(self.loop)
-
-    def wait(self):
-        while 1:
-            time.sleep(1.0)
-
-
-## utility
-
-
 def command(cli, txt, event=None):
-    evt = event and event() or Event()
+    evt = (event() if event else Event())
     evt.parse(txt)
     evt.orig = repr(cli)
     cli.handle(evt)
@@ -288,6 +281,9 @@ def parse(txt):
         prs.debug = True
     if "v" in prs.opts:
         prs.verbose = True
+    if "x" in prs.opts:
+        prs.exec = True
+    update(Cfg, prs)
     return prs
 
 
@@ -299,7 +295,6 @@ def scan(mod):
         names = cmd.__code__.co_varnames
         if "event" in names:
             Command.add(cmd)
-
 
 def scancls(mod):
     for _key, clz in inspect.getmembers(mod, inspect.isclass):
@@ -318,5 +313,6 @@ def scandir(path, func):
         except IndexError:
             pname = path
         mname = fnm.split(os.sep)[-1][:-3]
-        res.append(func(pname, mname))
+        path2 = os.path.join(path, fnm)
+        res.append(func(pname, mname, path2))
     return res

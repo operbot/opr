@@ -5,20 +5,15 @@
 "utility"
 
 
-## import
-
-
 import getpass
 import os
 import pwd
 import time
+import traceback
 import types
 
 
 from stat import ST_UID, ST_MODE, S_IMODE
-
-
-## define
 
 
 def __dir__():
@@ -26,8 +21,6 @@ def __dir__():
             'debian',
             'elapsed',
             'filesize',
-            'locked',
-            'permission',
             'spl',
             'touch',
             'user',
@@ -36,9 +29,6 @@ def __dir__():
 
 
 __all__ = __dir__()
-
-
-## utility
 
 
 def debian():
@@ -86,47 +76,6 @@ def elapsed(seconds, short=True):
 
 def filesize(path):
     return os.stat(path)[6]
-
-
-def locked(lock):
-
-    noargs = False
-
-    def lockeddec(func, *args, **kwargs):
-
-        def lockedfunc(*args, **kwargs):
-            lock.acquire()
-            if args or kwargs:
-                locked.noargs = True
-            res = None
-            try:
-                res = func(*args, **kwargs)
-            finally:
-                lock.release()
-            return res
-
-        lockeddec.__wrapped__ = func
-        lockeddec.__doc__ = func.__doc__
-        return lockedfunc
-
-    return lockeddec
-
-
-def permission(ddir, username, group=None, umode=0o700):
-    group = group or username
-    try:
-        pwdline = pwd.getpwnam(username)
-        uid = pwdline.pw_uid
-        gid = pwdline.pw_gid
-    except KeyError:
-        uid = os.getuid()
-        gid = os.getgid()
-    stats = os.stat(ddir)
-    if stats[ST_UID] != uid:
-        os.chown(ddir, uid, gid)
-    if S_IMODE(stats[ST_MODE]) != umode:
-        os.chmod(ddir, umode)
-    return True
 
 
 def spl(txt):

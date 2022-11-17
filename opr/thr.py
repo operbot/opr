@@ -5,18 +5,11 @@
 "thread"
 
 
-## import
-
-
 import os
 import queue
 import threading
 import time
-import traceback
 import types
-
-
-## define
 
 
 def __dir__():
@@ -30,9 +23,6 @@ def __dir__():
 
 
 __all__ = __dir__()
-
-
-## class
 
 
 class Thread(threading.Thread):
@@ -111,19 +101,6 @@ class Repeater(Timer):
         thr = launch(self.start)
         super().run()
         return thr
-
-
-## utility
-
-
-def from_exception(exc, txt="", sep=" "):
-    result = []
-    for frm in traceback.extract_tb(exc.__traceback__):
-        fnm = os.sep.join(frm.filename.split(os.sep)[-2:])
-        result.append(f"{fnm}:{frm.lineno}")
-    nme = name(exc)
-    res = sep.join(result)
-    return f"{txt} {res} {nme}: {exc}"
 
 
 def launch(func, *args, **kwargs):
