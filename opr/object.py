@@ -260,7 +260,7 @@ def dump(obj, opath):
             obj.__dict__, ofile, cls=ObjectEncoder, indent=4, sort_keys=True
         )
     #os.chmod(opath, 0o444)
-    permission(opath, "oper", 0o444)
+    permission(opath, "opr", 0o444)
     return opath
 
 
@@ -303,7 +303,7 @@ def write(obj):
             obj.__dict__, ofile, cls=ObjectEncoder, indent=4, sort_keys=True
         )
     os.chmod(opath, 0o444)
-    #permission(opath, "rssbot", 0o444)
+    #permission(opath, "opr", 0o444)
     return opath
 
 
@@ -469,7 +469,7 @@ class Class:
 
 class Wd:
 
-    workdir = ".rssbot"
+    workdir = ".opr"
 
     @staticmethod
     def get():

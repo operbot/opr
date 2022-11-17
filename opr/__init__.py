@@ -1,7 +1,7 @@
 # This file is placed in the Public Domain.
 
 
-"oper"
+"opr"
 
 
 import datetime
@@ -21,13 +21,10 @@ import uuid
 from stat import ST_UID, ST_MODE, S_IMODE
 
 
-from .hdl import *
-from .obj import *
-from .thr import *
-from .utl import *
-
-
-from .hdl import Cfg
+from .handler import *
+from .object import *
+from .thread import *
+from .util import *
 
 
 def __dir__():

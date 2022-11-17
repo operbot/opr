@@ -9,10 +9,10 @@ import threading
 import time
 
 
-from .hdl import Bus, Command
-from .obj import Class, Object, find, fntime, save, update
-from .thr import name
-from .utl import elapsed
+from opr.handler import Bus, Command
+from opr.object import Class, Object, find, fntime, save, update
+from opr.thread import name
+from opr.util import elapsed
 
 
 starttime = time.time()

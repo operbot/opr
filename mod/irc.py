@@ -18,13 +18,13 @@ import threading
 import _thread
 
 
-from .obj import Class, Default, Object
-from .obj import keys, last, locked, printable
-from .obj import edit, fntime, find, save, update
-from .obj import register
-from .hdl import Command, Event, Handler
-from .thr import launch
-from .utl import elapsed
+from opr.object import Class, Default, Object
+from opr.object import keys, last, locked, printable
+from opr.object import edit, fntime, find, save, update
+from opr.object import register
+from opr.handler import Command, Event, Handler
+from opr.thread import launch
+from opr.util import elapsed
 
 
 def __dir__():
@@ -43,8 +43,8 @@ def __dir__():
 __all__ = __dir__()
 
 
-NAME = "oper"
-REALNAME = "no idea"
+NAME = "opr"
+REALNAME = "object programming runtime"
 
 
 saylock = _thread.allocate_lock()

@@ -8,8 +8,8 @@
 import time
 
 
-from .obj import Wd, find, fntime, keys, printable
-from .utl import elapsed
+from opr.object import Wd, find, fntime, keys, printable
+from opr.util import elapsed
 
 
 def fnd(event):
