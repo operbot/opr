@@ -14,7 +14,7 @@ __version__ = "1"
 import unittest
 
 
-from opr.hdl import Bus, Handler
+from opr.handler import Bus, Handler
 
 
 ## classes
