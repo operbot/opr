@@ -35,9 +35,6 @@ def __dir__():
 __all__ = __dir__()
 
 
-Cfg = Default()
-
-
 class Bus(Object):
 
     objs = []
