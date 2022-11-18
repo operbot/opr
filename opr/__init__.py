@@ -71,6 +71,10 @@ from .util import *
 
 def __dir__():
     return (
+            "handler",
+            "object",
+            "thread",
+            "util",
             'Cfg',
             'Class',
             'Default',
