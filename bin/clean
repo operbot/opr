@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-# This file is placed in the Public Domain.
+# This file is placed in the Public Domain
 
 
-"cleanup"
+"clean"
 
 
 import os
@@ -10,12 +10,10 @@ import os
 
 def popen(txt):
     for line in os.popen(txt).readlines():
-        print(line)
+        print(line.rstrip())
 
 
-popen("rm -fR build dist MANIFEST opr.egg-info __pycache__ .pytest_cache")
-popen("rm -fR lib/*~ lib/__pycache__ lib/opr.egg-info")
-popen("rm -fR bin/*~")
-popen("rm -fR *~ .opr .test test/*~ test/__pycache__")
-popen("rm -fR mod/*~ mod/__pycache__")
+popen("rm -fRv build dist MANIFEST *.egg-info")
+popen("rm -fv *~ bin/*~")
+popen("rm -fRv .test .pytest_cache")
 popen("rm -fR opr/*~ opr/__pycache__")
