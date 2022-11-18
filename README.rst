@@ -4,22 +4,22 @@ README
 
 **NAME**
 
-| ``opr`` - object programming runtime
-|
+``opr`` - object programming runtime
+
 
 **SYNOPSIS**
 
 
-| ``opr [-c] [-i] [-r]``
-| ``opr <cmd> [key=value] [key==value]``
-|
+``import opr``
+
 
 **INSTALL**
 
-| ``pip3 install opr --upgrade --force-reinstall``
-|
+ ``pip3 install opr --upgrade --force-reinstall``
+
 
 **DESCRIPTION**
+
 
 With ``opr`` your can have the commands of a irc bot available on your cli.
 Instead of having to join a irc channel and give commands to your bot, you
@@ -31,9 +31,9 @@ that are read-only so thus should provide (disk) persistence. Paths carry the
 type in the path name what makes reconstruction from filename easier then
 reading type from the object.
 
-|
 
 **PROGRAMMING**
+
 
 The ``opr`` package provides an Object class, that mimics a dict while using
 attribute access and provides a save/load to/from json files on disk.
@@ -72,11 +72,13 @@ great for giving objects peristence by having their state stored in files::
 >>> save(o)
 >>> 'opr.Object/c13c5369-8ada-44a9-80b3-4641986f09df/2021-08-31/15:31:05.717063'
 
+
 **AUTHOR**
 
-| Bart Thate
-|
+
+Bart Thate
+
 
 **COPYRIGHT**
 
-| ``opr`` is placed in the Public Domain. No Copyright, No License.
+``opr`` is placed in the Public Domain. No Copyright, No License.
