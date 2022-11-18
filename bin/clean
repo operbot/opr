@@ -14,7 +14,7 @@ def popen(txt):
 
 
 popen("rm -fRv build dist MANIFEST *.egg-info")
-popen("rm -fv *~ bin/*~")
+popen("rm -fRv .opr *~ bin/*~")
 popen("rm -fRv .test .pytest_cache")
 popen("rm -fR opr/*~ opr/__pycache__")
 popen("rm -fR mod/*~ mod/__pycache__")
