@@ -113,18 +113,24 @@ def from_exception(exc, txt="", sep=" "):
     return f"{txt} {res} {nme}: {exc}".strip()
 
 
-def importer(pname, mname, path):
+def opimport(pname, mname, path, exec=False):
     mod = None
     spec = importlib.util.spec_from_file_location(mname, path)
     if spec:
         mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(mod)
-        scan(mod)
+        if exec:
+            spec.loader.exec_module(mod)
+    return mod
+
+
+def importer(pname, mname, path):
+    mod = opimport(pname, mname, path)
+    scan(mod)
     return mod
 
 
 def init(pname, mname, path=None):
-    mod = importer(pname, mname, path)
+    mod = opimport(pname, mname, path)
     if "init" in dir(mod):
         mod.init()
 
