@@ -14,8 +14,7 @@ import time
 
 
 from opr.object import Class, Default, Object, register, update
-from opr.thread import launch
-from opr.utils import elapsed
+from opr.thread import elapsed, launch
 
 
 def __dir__():
@@ -30,7 +29,9 @@ def __dir__():
             'command',
             'parse',
             'scan',
-            'scandir'
+            'scandir',
+            'starttime',
+            'wait'
            )
 
 
@@ -38,6 +39,7 @@ __all__ = __dir__()
 
 
 Cfg = Default()
+starttime = time.time()
 
 
 class Bus(Object):
@@ -323,3 +325,8 @@ def scandir(path, func):
         path2 = os.path.join(path, fnm)
         res.append(func(pname, mname, path2))
     return res
+
+
+def wait():
+    while 1:
+        time.sleep(1.0)

@@ -17,6 +17,7 @@ def __dir__():
             'Thread',
             'Timer',
             'Repeater',
+            'elapsed',
             'launch',
             'name'
            ) 
@@ -101,6 +102,47 @@ class Repeater(Timer):
         thr = launch(self.start)
         super().run()
         return thr
+
+
+def elapsed(seconds, short=True):
+    txt = ""
+    nsec = float(seconds)
+    if nsec < 1:
+        return f"{nsec:.4f}s"
+    year = 365*24*60*60
+    week = 7*24*60*60
+    nday = 24*60*60
+    hour = 60*60
+    minute = 60
+    years = int(nsec/year)
+    nsec -= years*year
+    weeks = int(nsec/week)
+    nsec -= weeks*week
+    nrdays = int(nsec/nday)
+    nsec -= nrdays*nday
+    hours = int(nsec/hour)
+    nsec -= hours*hour
+    minutes = int(nsec/minute)
+    nsec -= int(minute*minutes)
+    sec = int(nsec)
+    if years:
+        txt += "%sy" % years
+    if weeks:
+        nrdays += weeks * 7
+    if nrdays:
+        txt += "%sd" % nrdays
+    if years and short and txt:
+        return txt.strip()
+    if hours:
+        txt += "%sh" % hours
+    if minutes:
+        txt += "%sm" % minutes
+    if sec:
+        txt += "%ss" % sec
+    else:
+        txt += "0s"
+    txt = txt.strip()
+    return txt
 
 
 def launch(func, *args, **kwargs):

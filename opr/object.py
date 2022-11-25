@@ -83,6 +83,7 @@ def __dir__():
             'printable',
             'register',
             'save',
+            'spl',
             'update',
             'values',
             'write'
@@ -540,6 +541,14 @@ def cdir(path):
         path = os.path.dirname(path)
     ppp = pathlib.Path(path)
     ppp.mkdir(parents=True, exist_ok=True)
+
+
+def spl(txt):
+    try:
+        res = txt.split(",")
+    except (TypeError, ValueError):
+        res = txt
+    return [x for x in res if x]
 
 
 Class.add(Object)
