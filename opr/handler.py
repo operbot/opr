@@ -8,19 +8,21 @@
 import inspect
 import os
 import queue
+import sys
 import threading
 import time
 
 
-from .object import Class, Default, Object, register, update
-from .thread import launch
-from .util import elapsed
+from op.object import Class, Default, Object, register, update
+from op.thread import launch
+from op.utils import elapsed
 
 
 def __dir__():
     return (
             'Bus',
             'Callback',
+            'Cfg',
             'Command',
             'Parsed',
             'Event',
@@ -33,6 +35,9 @@ def __dir__():
 
 
 __all__ = __dir__()
+
+
+Cfg = Default()
 
 
 class Bus(Object):
@@ -79,11 +84,7 @@ class Callback(Object):
         if not func:
             event.ready()
             return
-        try:
-            event.__thr__ = launch(func, event)
-        except Exception as ex:
-            Callback.errors.append(ex)
-            event.ready()
+        event.__thr__ = launch(func, event)
 
     def dispatch(self, event):
         self.callback(event)
@@ -95,6 +96,7 @@ class Callback(Object):
 class Command(Object):
 
     cmd = Object()
+    errors = []
 
     @staticmethod
     def add(cmd):
@@ -110,9 +112,17 @@ class Command(Object):
             evt.parse()
         func = Command.get(evt.cmd)
         if func:
-            func(evt)
+            try:
+                func(evt)
+            except Exception as ex:
+                tbk = sys.exc_info()[2]
+                evt.__exc__ = ex.with_traceback(tbk)
+                Command.errors.append(evt)
+                evt.ready()
+                return None
             evt.show()
         evt.ready()
+        return None
 
     @staticmethod
     def remove(cmd):
@@ -256,8 +266,8 @@ class Event(Parsed):
             Bus.say(self.orig, self.channel, txt)
 
     def wait(self):
-        for thr in self._thrs:
-            thr.join()
+        if self.__thr__:
+            self.__thr__.join()
         self.__ready__.wait()
 
 
