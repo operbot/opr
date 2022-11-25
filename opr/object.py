@@ -2,7 +2,49 @@
 # pylint: disable=C0112,C0115,C0116,W0613,W0108,R0903
 
 
-"object"
+"""object programming runtime
+
+
+this module contains a big Object class that provides a clean, no methods,
+namespace for json data to be read into. this is necessary so that methods
+don't get overwritten by __dict__ updating and, without methods defined on
+the object, is easily being updated from a on disk stored json (dict).
+
+basic usage is this:
+
+>>> import opr
+>>> o = opr.Object()
+>>> o.key = "value"
+>>> o.key
+'value'
+
+Some hidden methods are provided, methods are factored out into functions
+like get, items, keys, register, set, update and values.
+
+load/save from/to disk:
+
+>>> from opr import Object, load, save
+>>> o = Object()
+>>> o.key = "value"
+>>> p = save(o)
+>>> oo = Object()
+>>> load(oo, p)
+>>> oo.key
+'value'
+
+big Objects can be searched with database functions and uses read-only files
+to improve persistence and a type in filename for reconstruction:
+
+'opr.object.Object/11ee5f11bd874f1eaa9005980f9d7a94/2021-08-31/15:31:05.717063'
+
+>>> from opr import Object, save
+>>> o = Object()
+>>> save(o)  # doctest: +ELLIPSIS
+'opr.object.Object/...'
+
+great for giving objects peristence by having their state stored in files.
+
+"""
 
 
 import datetime

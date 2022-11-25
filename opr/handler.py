@@ -13,9 +13,9 @@ import threading
 import time
 
 
-from op.object import Class, Default, Object, register, update
-from op.thread import launch
-from op.utils import elapsed
+from opr.object import Class, Default, Object, register, update
+from opr.thread import launch
+from opr.utils import elapsed
 
 
 def __dir__():
