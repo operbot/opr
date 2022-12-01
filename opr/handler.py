@@ -292,6 +292,8 @@ def parse(txt):
         prs.verbose = True
     if "x" in prs.opts:
         prs.exec = True
+    if "w" in prs.opts:
+        prs.wait = True
     update(Cfg, prs)
     return prs
 

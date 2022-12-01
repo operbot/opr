@@ -216,8 +216,8 @@ def printable(obj, args="", skip="", plain=False):
             continue
         txt = ""
         if plain:
-            txt = str(value)
-        elif isinstance(value, str) and len(value.split()) >= 2:
+            value = str(value)
+        if isinstance(value, str) and len(value.split()) >= 2:
             txt = '%s="%s"' % (key, value)
         else:
             txt = '%s=%s' % (key, value)

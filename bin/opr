@@ -3,7 +3,7 @@
 # pylint: disable=C0115,C0116,C0411,C0413
 
 
-"object programming bot"
+"object programming runtime"
 
 
 import atexit
@@ -21,15 +21,31 @@ sys.path.insert(0, os.getcwd())
 
 
 from opr.handler import Command, Cfg, Event, Handler
-from opr.handler import parse, scan, scandir, wait
+from opr.handler import command, parse, scan, scandir, wait
 from opr.object import Wd, printable
 
 
 Wd.workdir = os.path.expanduser("~/.opr")
 
 
-class Console(Handler):
+Cfg.console = False
+Cfg.exec = False
+Cfg.verbose = False
+Cfg.wait = False
 
+
+
+class CLI(Handler):
+
+    def announce(self, txt):
+        pass
+
+    def raw(self, txt):
+        print(txt)
+        sys.stdout.flush()
+
+
+class Console(CLI):
 
     def handle(self, event):
         Command.handle(event)
@@ -40,9 +56,6 @@ class Console(Handler):
         event.txt = input("> ")
         event.orig = repr(self)
         return event
-
-    def raw(self, txt):
-        print(txt)
 
 
 class Completer(rlcompleter.Completer):
@@ -74,6 +87,20 @@ def setcompleter(optionlist):
     atexit.register(lambda: readline.set_completer(None))
 
 
+def boot(txt):
+    parse(txt)
+    if "c" in Cfg.opts:
+        Cfg.console = True
+    if "d" in Cfg.opts:
+        Cfg.debug = True
+    if "v" in Cfg.opts:
+        Cfg.verbose = True
+    if "i" in Cfg.opts:
+        Cfg.exec = True
+    if "w" in Cfg.opts:
+        Cfg.wait = True
+
+
 def importer(pname, mname, path=None):
     if not path:
         path = pname
@@ -90,7 +117,7 @@ def init(pname, mname, path=None):
     mod = importer(pname, mname, path)
     if "init" in dir(mod):
         mod.init()
-
+    return mod
 
 def print_exc(ex):
     traceback.print_exception(type(ex), ex, ex.__traceback__)
@@ -116,14 +143,23 @@ def wrap(func):
 
 
 def main():
-    date = time.ctime(time.time()).replace("  ", " ")
-    parse(" ".join(sys.argv[1:]))
-    print("OPR started at %s %s" % (date, printable(Cfg, "debug,verbose")))
+    boot(" ".join(sys.argv[1:]))
     scandir("mod", importer)
-    scandir("mod", init)
-    csl = Console()
-    csl.start()
-    wait()
-
+    if Cfg.txt:
+        cli = CLI()
+        evt = command(cli, Cfg.otxt)
+        evt.wait()
+        return        
+    if Cfg.console:
+        date = time.ctime(time.time()).replace("  ", " ")
+        print("OPR started at %s %s" % (date, printable(Cfg, "console,debug,exec,verbose,wait", plain=True)))
+        csl = Console()
+        csl.start()
+        if Cfg.exec:
+            scandir("mod", init)
+        Cfg.wait = True
+    if Cfg.wait:
+        wait()
+    return None
 
 wrap(main)
