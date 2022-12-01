@@ -20,9 +20,8 @@ import traceback
 sys.path.insert(0, os.getcwd())
 
 
-from opr.handler import Command, Cfg, Event, Handler
-from opr.handler import command, parse, scan, scandir, wait
-from opr.object import Wd, printable
+from opr import Command, Cfg, Event, Handler, Wd
+from opr import command, parse, printable, scan, scandir, wait
 
 
 Wd.workdir = os.path.expanduser("~/.opr")
