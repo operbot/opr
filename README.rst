@@ -15,7 +15,7 @@ README
 
 **INSTALL**
 
- ``pip3 install opr --upgrade --force-reinstall``
+``pip3 install opr --upgrade --force-reinstall``
 
 
 **DESCRIPTION**

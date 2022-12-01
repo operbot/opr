@@ -5,25 +5,18 @@
 "env"
 
 
-## import
-
-
 import os
 
 
-## utility
-
-
 def popen(txt):
-    "run command"
     for line in os.popen(txt).readlines():
         print(line.strip())
 
 
-## runtime
-
-
 name = os.getcwd()
+
+
+popen("rm -fR ~/.cache/pip")
 
 
 if not os.path.exists("dist"):

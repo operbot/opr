@@ -15,4 +15,5 @@ def popen(txt):
         sys.stdout.flush()
 
 popen("python3 setup.py sdist")
-#popen("python3 -m pip wheel -w dist .")
+popen("python3 -m pip wheel -e .")
+popen("mv *.whl dist")
