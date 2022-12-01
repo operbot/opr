@@ -19,6 +19,7 @@ setup(
     url="http://github.com/operbot/opr",
     description="object programming runtime",
     long_description=read(),
+    long_description_content_type="text/x-rst",
     license="Public Domain",
     packages=["opr"],
     classifiers=[

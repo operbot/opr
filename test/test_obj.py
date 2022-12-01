@@ -1,5 +1,5 @@
 # This file is placed in the Public Domain.
-# pylint: disable=W0401,W0621,W0614,W1503
+# pylint: disable=C0115,C0116,W0401,W0621,W0614,W1503,R0904,E1101
 
 
 "object"
@@ -13,13 +13,15 @@ import _thread
 import opr.object
 
 
-from opr import *
+from opr.object import *
+from opr.handler import *
+from opr.thread import *
 
 
 Wd.workdir = ".test"
 
 
-FN = "opr.object.Object/c13c5369-8ada-44a9-80b3-4641986f09df/2022-04-11/22:40:31.259218"
+FN = "opr.object.Object/1dd93ecc467d467c98092239055e926c/2022-04-11/22:40:31.259218"
 VALIDJSON = '{"test": "bla"}'
 
 
@@ -95,9 +97,9 @@ attrs2 = (
 
 class TestObject(unittest.TestCase):
 
-    def setUp(self):
-        o = Object()
-        save(o)
+    #def setUp(self):
+    #    obj = Object()
+    #    save(obj)
 
     def test_match(self):
         mtc = match("opr.object.Object", {"txt": "test"})
@@ -115,7 +117,7 @@ class TestObject(unittest.TestCase):
 
     def test_name(self):
         obj = Object()
-        self.assertEqual(name(obj), "Object")    
+        self.assertEqual(name(obj), "Object")
 
     def test_decoder(self):
         obj = ObjectDecoder().decode('{"bla": "mekker"}')
