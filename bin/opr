@@ -28,7 +28,7 @@ Wd.workdir = os.path.expanduser("~/.opr")
 
 
 Cfg.console = False
-Cfg.exec = False
+Cfg.daemon = False
 Cfg.verbose = False
 Cfg.wait = False
 
@@ -91,13 +91,26 @@ def boot(txt):
     if "c" in Cfg.opts:
         Cfg.console = True
     if "d" in Cfg.opts:
-        Cfg.debug = True
+        Cfg.daemon = True
     if "v" in Cfg.opts:
         Cfg.verbose = True
-    if "i" in Cfg.opts:
-        Cfg.exec = True
     if "w" in Cfg.opts:
         Cfg.wait = True
+
+
+def daemon():
+    pid = os.fork()
+    if pid != 0:
+        os._exit(0)
+    os.setsid()
+    os.umask(0)
+    sis = open("/dev/null", 'r')
+    os.dup2(sis.fileno(), sys.stdin.fileno())
+    if not Cfg.verbose:
+        sos = open("/dev/null", 'a+')
+        ses = open("/dev/null", 'a+')
+        os.dup2(sos.fileno(), sys.stdout.fileno())
+        os.dup2(ses.fileno(), sys.stderr.fileno())
 
 
 def importer(pname, mname, path=None):
@@ -143,22 +156,24 @@ def wrap(func):
 
 def main():
     boot(" ".join(sys.argv[1:]))
-    scandir("mod", importer)
+    scandir(Wd.moddir(), importer)
     if Cfg.txt:
         cli = CLI()
         evt = command(cli, Cfg.otxt)
         evt.wait()
         return        
+    if Cfg.daemon:
+        daemon()
+        Cfg.wait = True
     if Cfg.console:
         date = time.ctime(time.time()).replace("  ", " ")
-        print("OPR started at %s %s" % (date, printable(Cfg, "console,debug,exec,verbose,wait", plain=True)))
+        print("OPR started at %s %s" % (date, printable(Cfg, "console,debug,verbose,wait", plain=True)))
         csl = Console()
         csl.start()
-        if Cfg.exec:
-            scandir("mod", init)
-        Cfg.wait = True
     if Cfg.wait:
+        scandir(Wd.moddir(), init)
         wait()
     return None
+
 
 wrap(main)

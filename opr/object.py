@@ -515,6 +515,10 @@ class Wd:
         return os.path.join(Wd.get(), "store", path)
 
     @staticmethod
+    def moddir():
+        return os.path.join(Wd.get(), "mod")
+
+    @staticmethod
     def set(path):
         Wd.workdir = path
 
