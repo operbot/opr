@@ -1,0 +1,33 @@
+#!/usr/bin/env python3
+# This file is placed in the Public Domain.
+
+
+"cleanup"
+
+
+import os
+
+
+cwd = os.getcwd()
+
+
+SKIPDIR = [".git", ".pytest_cache", "env"]
+
+
+def popen(txt, silent=False):
+    for line in os.popen(txt).readlines():
+        if silent:
+            continue
+        print(line.strip())
+
+
+def main():
+    popen("rm -fRv build dist MANIFEST *.egg-info")
+    popen("rm -fRv  __pycache__ *~")
+    popen("rm -fRv .test")
+    popen("fin/loop . rm -fRv \*~")
+    popen("fin/loop . rm -fRv __pycache__")
+
+
+if __name__ == "__main__":
+    main()
