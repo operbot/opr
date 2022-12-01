@@ -22,7 +22,7 @@ def popen(txt, silent=False):
 
 
 def main():
-    popen("rm -fRv build dist MANIFEST *.egg-info")
+    popen("rm -fRv build dist MANIFEST *.egg-info *.whl")
     popen("rm -fRv  __pycache__ *~")
     popen("rm -fRv .test")
     popen("fin/loop . rm -fRv \*~")

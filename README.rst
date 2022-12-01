@@ -32,6 +32,13 @@ type in the path name what makes reconstruction from filename easier then
 reading type from the object.
 
 
+**CONFIGURATION**
+
+``opr`` looks for it's modules in ~/.opr/mod. A collection of sample modules 
+can be found in /usr/local/opr/mod. Copy what modules you want to ~/.opr/mod,
+or write your own modules and put them in ~/.opr/mod. 
+
+
 **PROGRAMMING**
 
 

@@ -17,9 +17,6 @@ import time
 import traceback
 
 
-sys.path.insert(0, os.getcwd())
-
-
 from opr import Command, Cfg, Event, Handler, Wd
 from opr import command, parse, printable, scan, scandir, wait
 
@@ -31,7 +28,6 @@ Cfg.console = False
 Cfg.daemon = False
 Cfg.verbose = False
 Cfg.wait = False
-
 
 
 class CLI(Handler):
@@ -166,10 +162,12 @@ def main():
         daemon()
         Cfg.wait = True
     if Cfg.console:
+        setcompleter(Command.cmd)
         date = time.ctime(time.time()).replace("  ", " ")
         print("OPR started at %s %s" % (date, printable(Cfg, "console,debug,verbose,wait", plain=True)))
         csl = Console()
         csl.start()
+        Cfg.wait = True
     if Cfg.wait:
         scandir(Wd.moddir(), init)
         wait()

@@ -4,11 +4,29 @@
 "object programming runtime"
 
 
+import os
+
+
 from setuptools import setup
 
 
 def read():
     return open("README.rst", "r").read()
+
+
+def uploadlist(dir):
+    upl = []
+    for file in os.listdir(dir):
+        if not file or file.startswith('.'):
+            continue
+        d = dir + os.sep + file
+        if os.path.isdir(d):   
+            upl.extend(uploadlist(d))
+        else:
+            if file.endswith(".pyc") or file.startswith("__pycache"):
+                continue
+            upl.append(d)
+    return upl
 
 
 setup(
@@ -22,6 +40,11 @@ setup(
     long_description_content_type="text/x-rst",
     license="Public Domain",
     packages=["opr"],
+    scripts=["bin/opr"],
+    include_package_data=True,
+    data_files=[
+                ("opr/mod", uploadlist("mod"))
+               ],
     classifiers=[
         "Development Status :: 4 - Beta",
         "License :: Public Domain",
