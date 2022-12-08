@@ -22,7 +22,6 @@ def popen(txt, silent=False):
 
 
 def main():
-    popen("bin/clean", True)
     popen("rm -fRv build dist MANIFEST *.egg-info *.whl")
     popen("rm -fRv  __pycache__ *~")
     popen("rm -fRv .test")
