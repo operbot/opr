@@ -1,0 +1,54 @@
+#!/usr/bin/env python3
+# This file is placed in the Public Domain.
+# pylint: disable=C0114,C0115,C0116,C0413,R0801
+
+
+"write your own commands"
+
+
+__version__ = "110"
+
+
+import os
+import importlib
+import sys
+
+
+sys.path.insert(0, os.getcwd())
+
+
+from opr import Cfg, Handler, Wd, command, parse, scan, scandir
+
+
+Wd.workdir = os.path.expanduser("~/.opr")
+
+
+class CLI(Handler):
+
+    @staticmethod
+    def raw(txt):
+        print(txt)
+
+
+def importer(pname, mname, path=None):
+    if not path:
+        path = pname
+    mod = None
+    spec = importlib.util.spec_from_file_location(mname, path)
+    if spec:
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        scan(mod)
+    return mod
+
+
+def main():
+    parse(' '.join(sys.argv[1:]))
+    scandir(Wd.moddir(), importer)
+    scandir("mod", importer)
+    cli = CLI()
+    evt = command(cli, Cfg.otxt)
+    evt.wait()
+
+
+main()
