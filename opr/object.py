@@ -79,6 +79,7 @@ def __dir__():
             'last',
             'load',
             'loads',
+            'locked',
             'match',
             'printable',
             'register',

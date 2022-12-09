@@ -5,9 +5,7 @@
 "object programming runtime"
 
 
-import opr.handler as handler
-import opr.object as object
-import opr.thread as thread
+from opr import handler, object, thread
 
 
 from opr.handler import *
