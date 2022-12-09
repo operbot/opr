@@ -175,6 +175,7 @@ def main():
         csl = Console()
         csl.start()
         Cfg.wait = True
+        Cfg.exec = True
     if Cfg.wait:
         if Cfg.exec:
             scandir(Wd.moddir(), init)
