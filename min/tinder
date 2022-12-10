@@ -1,0 +1,177 @@
+#!/usr/bin/env python3
+# pylint: disable=E1101,C0115,C0116,W0613,C0413,E0401,R0903
+# This file is placed in the Public Domain.
+
+
+"tinder"
+
+
+import importlib
+import importlib.util
+import os
+import random
+import shutil
+import sys
+import termios
+import time
+import traceback
+import _thread
+
+
+sys.path.insert(0, os.getcwd())
+
+
+from opr import Cfg, Client, Command, Event, Object, Wd
+from opr import launch, parse, scan, scandir, update
+from opr import elapsed, name
+from opr import locked
+
+
+paylock = _thread.allocate_lock()
+
+
+Wd.workdir = ".test"
+Cfg.debug = True
+
+
+errors = []
+events = []
+results = []
+
+
+param = Object()
+param.add = ["test@shell", "bart", ""]
+param.cfg = ["server=localhost", ""]
+param.dne = ["test4", ""]
+param.rem = ["reddit", ""]
+param.dpl = ["reddit title,summary,link", ""]
+param.flt = ["0", ""]
+param.fnd = [
+             "cfg",
+             "log",
+             "rss",
+             "log txt==test",
+             "cfg server==localhost",
+             "rss rss==reddit"
+            ]
+param.log = ["test1", ""]
+param.nme = ["reddit reddit"]
+param.dpl = ["reddit title,link"]
+param.rem = ["reddit"]
+param.rss = ["https://www.reddit.com/r/python/.rss"]
+param.tdo = ["test4", ""]
+param.thr = [""]
+
+
+def cprint(txt):
+    print(txt)
+    sys.stdout.flush()
+
+
+class CLI(Client):
+
+    @staticmethod
+    def raw(txt):
+        if Cfg.verbose:
+            cprint(txt)
+
+
+def boot():
+    txt = ' '.join(sys.argv[1:])
+    cfg = parse(txt)
+    update(Cfg, cfg)
+    return cfg
+
+
+def consume(evts):
+    fixed = []
+    res = []
+    for evt in evts:
+        evt.wait()
+        fixed.append(evt)
+    for fff in fixed:
+        try:
+            evts.remove(fff)
+        except ValueError:
+            continue
+    return res
+
+
+def from_exception(ex, txt="", sep=" "):
+    result = []
+    for frm in traceback.extract_tb(ex.__traceback__):
+        result.append("%s:%s" % (os.sep.join(frm.filename.split(os.sep)[-2:]), frm.lineno))
+    res = "%s(%s) %s" % (name(ex), ex, " ".join(result))
+    return res.strip()
+
+
+def importer(pname, mname, path=None):
+    if not path:
+        path = pname
+    mod = None
+    spec = importlib.util.spec_from_file_location(mname, path)
+    if spec:
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        scan(mod)
+    return mod
+
+
+@locked(paylock)
+def payload(clt):
+    cmds = sorted(Command.cmd)
+    random.shuffle(cmds)
+    nmr = 0
+    for cmnd in cmds:
+        for ex in getattr(param, cmnd, [""]):
+            evt = Event()
+            evt.txt = cmnd + " " + ex
+            evt.orig = repr(clt)
+            evt.parse()
+            clt.handle(evt)
+            events.append(evt)
+            nmr += 1
+    return nmr
+
+
+def print_exc(ex):
+    traceback.print_exception(type(ex), ex, ex.__traceback__)
+
+
+def wrap(func):
+    fds = sys.stdin.fileno()
+    old = termios.tcgetattr(fds)
+    try:
+        func()
+    except (EOFError, KeyboardInterrupt):
+        cprint("")
+    finally:
+        termios.tcsetattr(fds, termios.TCSADRAIN, old)
+        for evt in Command.errors:
+            print_exc(evt.__exc__)
+
+
+def main():
+    if os.path.exists(Cfg.workdir):
+        shutil.rmtree(Cfg.workdir)
+    cfg = boot()
+    scandir("mod", importer)
+    cli = CLI()
+    nrs = cfg.index or 1
+    starttime = time.time()
+    waiters = []
+    res = 1
+    for _nr in range(nrs):
+        waiters.append(launch(payload, cli))
+    for wtr in waiters:
+        res += wtr.join() or 0
+    consume(events)
+    endtime = time.time()
+    print("%s %s %s (%s remaining)" %  (
+                                        elapsed(endtime - starttime),
+                                        res,
+                                        (endtime - starttime)/res, len(events))
+                                       )
+
+
+wrap(main)

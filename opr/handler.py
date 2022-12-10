@@ -13,15 +13,14 @@ import threading
 import time
 
 
-from opr.object import Class, Default, Object, register, update
-from opr.thread import elapsed, launch
+from opr.object import Class, Default, Object, register, spl, update
 
 
 def __dir__():
     return (
             'Bus',
-            'Callback',
             'Cfg',
+            'Client',
             'Command',
             'Parsed',
             'Event',
@@ -30,6 +29,7 @@ def __dir__():
             'parse',
             'scan',
             'scandir',
+            'skip',
             'starttime',
             'wait'
            )
@@ -48,8 +48,7 @@ class Bus(Object):
 
     @staticmethod
     def add(obj):
-        if repr(obj) not in [repr(x) for x in Bus.objs]:
-            Bus.objs.append(obj)
+        Bus.objs.append(obj)
 
     @staticmethod
     def announce(txt):
@@ -68,31 +67,8 @@ class Bus(Object):
     @staticmethod
     def say(orig, channel, txt):
         bot = Bus.byorig(orig)
-        if bot:
+        if bot.cbs:
             bot.say(channel, txt)
-
-
-class Callback(Object):
-
-    cbs = Object()
-    errors = []
-
-    def register(self, typ, cbs):
-        if typ not in self.cbs:
-            setattr(self.cbs, typ, cbs)
-
-    def callback(self, event):
-        func = getattr(self.cbs, event.type, None)
-        if not func:
-            event.ready()
-            return
-        event.__thr__ = launch(func, event)
-
-    def dispatch(self, event):
-        self.callback(event)
-
-    def get(self, typ):
-        return getattr(self.cbs, typ)
 
 
 class Command(Object):
@@ -114,73 +90,53 @@ class Command(Object):
             evt.parse()
         func = Command.get(evt.cmd)
         if func:
-            try:
-                func(evt)
-            except Exception as ex:
-                tbk = sys.exc_info()[2]
-                evt.__exc__ = ex.with_traceback(tbk)
-                Command.errors.append(evt)
-                evt.ready()
-                return None
+            func(evt)
             evt.show()
         evt.ready()
-        return None
-
-    @staticmethod
-    def remove(cmd):
-        delattr(Command.cmd, cmd)
 
 
-class Handler(Callback):
+
+class Handler(Object):
+
+    cbs = Object()
+
+    def dispatch(self, event):
+        func = getattr(Handler.cbs, event.type, None)
+        if not func:
+            event.ready()
+            return
+        event.starttime = time.time()
+        func(event)
+
+    def loop(self):
+        while 1:
+            self.dispatch(self.poll())
+
+    def poll(self):
+        raise NotImplementedError("poll")
+
+    def register(self, typ, cbs):
+        setattr(Handler.cbs, typ, cbs)
+
+    def start(self):
+        self.loop()
+
+
+class Client(Handler):
 
     def __init__(self):
-        Callback.__init__(self)
-        self.queue = queue.Queue()
-        self.stopped = threading.Event()
-        self.stopped.clear()
+        Handler.__init__(self)
         self.register("event", Command.handle)
         Bus.add(self)
 
-    @staticmethod
-    def add(cmd):
-        Command.add(cmd)
-
-    def announce(self, txt):
+    def announce(txt):
         self.raw(txt)
-
-    def handle(self, event):
-        self.dispatch(event)
-
-    def loop(self):
-        while not self.stopped.set():
-            self.handle(self.poll())
-
-    def poll(self):
-        return self.queue.get()
-
-    def put(self, event):
-        self.queue.put_nowait(event)
 
     def raw(self, txt):
         raise NotImplementedError("raw")
 
-    def restart(self):
-        self.stop()
-        self.start()
-
     def say(self, channel, txt):
         self.raw(txt)
-
-    def stop(self):
-        self.stopped.set()
-
-    def start(self):
-        self.stopped.clear()
-        launch(self.loop)
-
-    def wait(self):
-        while 1:
-            time.sleep(1.0)
 
 
 class Parsed(Default):
@@ -241,9 +197,6 @@ class Event(Parsed):
     def __init__(self):
         Parsed.__init__(self)
         self.__ready__ = threading.Event()
-        self.__thr__ = None
-        self.control = "!"
-        self.createtime = time.time()
         self.result = []
         self.type = "event"
 
@@ -254,8 +207,7 @@ class Event(Parsed):
         pass
 
     def done(self):
-        diff = elapsed(time.time()-self.createtime)
-        Bus.say(self.orig, self.channel, f'ok {diff}')
+        Bus.say(self.orig, self.channel, "ok")
 
     def ready(self):
         self.__ready__.set()
@@ -268,8 +220,6 @@ class Event(Parsed):
             Bus.say(self.orig, self.channel, txt)
 
     def wait(self):
-        if self.__thr__:
-            self.__thr__.join()
         self.__ready__.wait()
 
 
@@ -277,7 +227,8 @@ def command(cli, txt, event=None):
     evt = (event() if event else Event())
     evt.parse(txt)
     evt.orig = repr(cli)
-    cli.handle(evt)
+    cli.dispatch(evt)
+    evt.wait()
     return evt
 
 
@@ -312,11 +263,15 @@ def scancls(mod):
         Class.add(clz)
 
 
-def scandir(path, func):
+def scandir(path, func, mods=None, init=False):
     res = []
+    if mods == None:
+        mods = ""
     if not os.path.exists(path):
         return res
     for fnm in os.listdir(path):
+        if skip(fnm, mods):
+            continue            
         if fnm.endswith("~") or fnm.startswith("__"):
             continue
         try:
@@ -325,10 +280,20 @@ def scandir(path, func):
             pname = path
         mname = fnm.split(os.sep)[-1][:-3]
         path2 = os.path.join(path, fnm)
-        res.append(func(pname, mname, path2))
+        res.append(func(pname, mname, path2, init))
     return res
+
+
+def skip(name, names):
+    for nme in spl(names):
+       if nme in name:
+           return False
+    return True
 
 
 def wait():
     while 1:
-        time.sleep(1.0)
+        try: 
+            time.sleep(1.0)
+        except Exception as ex:
+            threading.interrupt_main()

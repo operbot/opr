@@ -43,7 +43,7 @@ def thr(event):
         if getattr(obj, "sleep", None):
             uptime = obj.sleep - int(time.time() - obj.state["latest"])
         else:
-            uptime = int(time.time() - obj.starttime)
+            uptime = int(time.time() - starttime)
         result.append((uptime, thread.name))
     res = []
     for uptime, txt in sorted(result, key=lambda x: x[0]):

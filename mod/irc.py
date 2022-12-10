@@ -18,7 +18,7 @@ import threading
 import _thread
 
 
-from opr import Class, Command, Default, Event, Handler, Object
+from opr import Class, Client, Command, Default, Event, Object
 from opr import edit, fntime, find, keys, last, printable, save, update
 from opr import elapsed, launch, locked, register
 
@@ -176,10 +176,10 @@ class Output(Object):
         self.oqueue.put_nowait((None, None))
 
 
-class IRC(Handler, Output):
+class IRC(Client, Output):
 
     def __init__(self):
-        Handler.__init__(self)
+        Client.__init__(self)
         Output.__init__(self)
         self.buffer = []
         self.cfg = Config()
@@ -523,8 +523,8 @@ class IRC(Handler, Output):
             self.channels.append(self.cfg.channel)
         self.connected.clear()
         self.joined.clear()
-        Output.start(self)
-        Handler.start(self)
+        launch(Output.start, self)
+        launch(Client.start, self)
         launch(
                self.doconnect,
                self.cfg.server,
@@ -539,7 +539,7 @@ class IRC(Handler, Output):
             self.sock.shutdown(2)
         except OSError:
             pass
-        Handler.stop(self)
+        Client.stop(self)
 
 
 class Users(Object):

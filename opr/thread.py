@@ -29,17 +29,10 @@ class Thread(threading.Thread):
 
     ""
 
-    def __init__(self, func, thrname, *args, daemon=True):
+    def  __init__(self, target=None, args=None, kwargs=None, daemon=None, thrname=None):
         ""
-        super().__init__(None, self.run, name, (), {}, daemon=daemon)
-        self._exc = None
-        self._evt = None
-        self.name = thrname or name(func)
-        self.queue = queue.Queue()
-        self.queue.put_nowait((func, args))
-        self.sleep = None
-        self.starttime = time.time()
-        self.state = None
+        threading.Thread.__init__(self, None, target, name(target), args or (), kwargs or {}, daemon=daemon or True)
+        self.name = thrname or name(target)
         self._result = None
 
     def __iter__(self):
@@ -54,15 +47,10 @@ class Thread(threading.Thread):
         super().join(timeout)
         return self._result
 
-    def run(self) -> None:
-        ""
-        func, args = self.queue.get()
-        if args:
-            self._evt = args[0]
-            if self._evt.cmd:
-                self.name = self._evt.cmd
-        self.starttime = time.time()
-        self._result = func(*args)
+
+    def run(self):
+        self._result = self._target(*self._args)
+
 
 class Timer:
 
@@ -85,7 +73,6 @@ class Timer:
         timer.daemon = True
         timer.sleep = self.sleep
         timer.state = self.state
-        timer.state["starttime"] = time.time()
         timer.state["latest"] = time.time()
         timer.func = self.func
         timer.start()
@@ -146,9 +133,8 @@ def elapsed(seconds, short=True):
     return txt
 
 
-def launch(func, *args, **kwargs):
-    thrname = kwargs.get("name", name(func))
-    thr = Thread(func, thrname, *args)
+def launch(func, *args):
+    thr = Thread(func, args)
     thr.start()
     return thr
 

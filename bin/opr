@@ -1,41 +1,29 @@
 #!/usr/bin/env python3
 # This file is placed in the Public Domain.
-# pylint: disable=C0115,C0116,C0411,C0413
+# pylint: disable=C0116,C0413,W0212
 
 
 "write your own commands"
 
 
-import atexit
 import importlib
 import importlib.util
 import os
-import readline
-import rlcompleter
 import sys
-import termios
-import time
-import traceback
-import threading
 
 
 sys.path.insert(0, os.getcwd())
 
 
-from opr import Command, Cfg, Event, Handler, Wd
-from opr import command, parse, printable, scan, scandir, wait
+from opr import Cfg, Client, Command, Wd
+from opr import command, launch, parse, scan, scandir, wait
 
 
 Wd.workdir = os.path.expanduser("~/.opr")
 
 
-Cfg.console = False
-Cfg.daemon = False
-Cfg.verbose = False
-Cfg.wait = False
+class CLI(Client):
 
-
-class CLI(Handler):
 
     def announce(self, txt):
         pass
@@ -45,78 +33,21 @@ class CLI(Handler):
         sys.stdout.flush()
 
 
-class Console(CLI):
-
-    def handle(self, event):
-        Command.handle(event)
-        event.wait()
-
-    def poll(self):
-        event = Event()
-        event.txt = input("> ")
-        event.orig = repr(self)
-        return event
-
-
-class Completer(rlcompleter.Completer):
-
-    def __init__(self, options):
-        super().__init__()
-        self.matches = []
-        self.options = options
-
-    def complete(self, text, state):
-        if state == 0:
-            if text:
-                self.matches = [
-                                s for s in self.options
-                                if s and s.startswith(text)
-                               ]
-            else:
-                self.matches = self.options[:]
-        try:
-            return self.matches[state]
-        except IndexError:
-            return None
-
-
-def setcompleter(optionlist):
-    completer = Completer(optionlist)
-    readline.set_completer(completer.complete)
-    readline.parse_and_bind("tab: complete")
-    atexit.register(lambda: readline.set_completer(None))
-
-
 def boot(txt):
     parse(txt)
     if "c" in Cfg.opts:
         Cfg.console = True
     if "d" in Cfg.opts:
         Cfg.daemon = True
+    if "i" in Cfg.opts:
+        Cfg.init = True
     if "v" in Cfg.opts:
         Cfg.verbose = True
     if "w" in Cfg.opts:
         Cfg.wait = True
-    if "x" in Cfg.opts:
-        Cfg.exec = True
 
 
-def daemon():
-    pid = os.fork()
-    if pid != 0:
-        os._exit(0)
-    os.setsid()
-    os.umask(0)
-    sis = open("/dev/null", 'r')
-    os.dup2(sis.fileno(), sys.stdin.fileno())
-    if not Cfg.verbose:
-        sos = open("/dev/null", 'a+')
-        ses = open("/dev/null", 'a+')
-        os.dup2(sos.fileno(), sys.stdout.fileno())
-        os.dup2(ses.fileno(), sys.stderr.fileno())
-
-
-def importer(pname, mname, path=None):
+def importer(pname, mname, path=None, init=False):
     if not path:
         path = pname
     mod = None
@@ -125,63 +56,15 @@ def importer(pname, mname, path=None):
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
         scan(mod)
+    if init and "init" in dir(mod):
+        launch(mod.init)
     return mod
 
 
-def init(pname, mname, path=None):
-    mod = importer(pname, mname, path)
-    if "init" in dir(mod):
-        mod.init()
-    return mod
 
-
-def print_exc(ex):
-    traceback.print_exception(type(ex), ex, ex.__traceback__)
-
-
-def wrap(func):
-    fds = sys.stdin.fileno()
-    gotterm = True
-    try:
-        old = termios.tcgetattr(fds)
-    except termios.error:
-        gotterm = False
-    readline.redisplay()
-    try:
-        func()
-    except (EOFError, KeyboardInterrupt):
-        print("")
-    finally:
-        if gotterm:
-            termios.tcsetattr(fds, termios.TCSADRAIN, old)
-        for evt in Command.errors:
-            print_exc(evt.__exc__)
-
-
-def main():
+if __name__ == "__main__":
     boot(" ".join(sys.argv[1:]))
-    scandir(Wd.moddir(), importer)
-    if Cfg.txt:
-        cli = CLI()
-        evt = command(cli, Cfg.otxt)
-        evt.wait()
-        return        
-    if Cfg.daemon:
-        daemon()
-        Cfg.wait = True
-    if Cfg.console:
-        setcompleter(Command.cmd)
-        date = time.ctime(time.time()).replace("  ", " ")
-        print("OPR started at %s %s" % (date, printable(Cfg, "console,debug,verbose,wait", plain=True)))
-        csl = Console()
-        csl.start()
-        Cfg.wait = True
-        Cfg.exec = True
-    if Cfg.wait:
-        if Cfg.exec:
-            scandir(Wd.moddir(), init)
-        wait()
-    return None
-
-
-wrap(main)
+    scandir("mod", importer, Cfg.sets.mods or "cmds,log,tdo")
+    cli = CLI()
+    command(cli, Cfg.otxt)
+    sys.stdout.flush()
