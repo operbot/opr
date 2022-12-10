@@ -40,7 +40,6 @@ setup(
     long_description_content_type="text/x-rst",
     license="Public Domain",
     packages=["opr"],
-    scripts=["bin/opr"],
     classifiers=[
         "Development Status :: 4 - Beta",
         "License :: Public Domain",

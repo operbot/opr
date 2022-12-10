@@ -14,16 +14,16 @@ from opr import Bus, Object, elapsed, name, update
 
 def __dir__():
     return (
-            'fleet',
-            'threads',
-            'uptime'
+            'flt',
+            'thr',
+            'upt'
            )
 
 
 starttime = time.time()
 
 
-def fleet(event):
+def flt(event):
     try:
         index = int(event.args[0])
         event.reply(Bus.objs[index])
@@ -33,7 +33,7 @@ def fleet(event):
     event.reply(" | ".join([name(o) for o in Bus.objs]))
 
 
-def threads(event):
+def thr(event):
     result = []
     for thr in sorted(threading.enumerate(), key=lambda x: x.getName()):
         if str(thr).startswith("<_"):
@@ -54,5 +54,5 @@ def threads(event):
         event.reply("no threads running")
 
 
-def uptime(event):
+def upt(event):
     event.reply(elapsed(time.time()-starttime))

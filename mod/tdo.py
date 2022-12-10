@@ -14,7 +14,7 @@ from opr import Class, Object, elapsed, find, fntime, save
 def __dir__():
     return (
             'Todo',
-            'todo',
+            'tdo',
            )
 
 
@@ -28,7 +28,7 @@ class Todo(Object):
 Class.add(Todo)
 
 
-def todo(event):
+def tdo(event):
     if not event.rest:
         nmr = 0
         for obj in find("todo"):

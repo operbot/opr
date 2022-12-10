@@ -8,17 +8,16 @@
 import time
 
 
-from opr.object import Wd, fntime, keys, printable
-from opr.object import find as fnd
-from opr.thread import elapsed
+from opr import Wd, elapsed, fntime, keys, printable
+from opr import find as fnd
 
 
 def __dir__():
     return (
-            "find",
+            "fnd",
            )
 
-def find(event):
+def fnd(event):
     if not event.args:
         res = ",".join(sorted([x.split(".")[-1].lower() for x in Wd.types()]))
         if res:
