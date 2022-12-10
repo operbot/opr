@@ -10,6 +10,7 @@ from opr import handler, object, thread
 
 from opr.handler import *
 from opr.object import *
+from opr.run import *
 from opr.thread import *
 
 
@@ -17,6 +18,7 @@ def __dir__():
     return (
             'handler',
             'object',
+            'run',
             'thread',
            )
 

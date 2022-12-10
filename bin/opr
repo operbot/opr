@@ -15,56 +15,20 @@ import sys
 sys.path.insert(0, os.getcwd())
 
 
-from opr import Cfg, Client, Command, Wd
+from opr import Cfg, CLI, Command, Wd
 from opr import command, launch, parse, scan, scandir, wait
+from opr import boot, importer, wrap
 
 
 Wd.workdir = os.path.expanduser("~/.opr")
 
 
-class CLI(Client):
 
-
-    def announce(self, txt):
-        pass
-
-    def raw(self, txt):
-        print(txt)
-        sys.stdout.flush()
-
-
-def boot(txt):
-    parse(txt)
-    if "c" in Cfg.opts:
-        Cfg.console = True
-    if "d" in Cfg.opts:
-        Cfg.daemon = True
-    if "i" in Cfg.opts:
-        Cfg.init = True
-    if "v" in Cfg.opts:
-        Cfg.verbose = True
-    if "w" in Cfg.opts:
-        Cfg.wait = True
-
-
-def importer(pname, mname, path=None, init=False):
-    if not path:
-        path = pname
-    mod = None
-    spec = importlib.util.spec_from_file_location(mname, path)
-    if spec:
-        mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(mod)
-        scan(mod)
-    if init and "init" in dir(mod):
-        launch(mod.init)
-    return mod
-
-
-
-if __name__ == "__main__":
+def main():
     boot(" ".join(sys.argv[1:]))
-    scandir("mod", importer, Cfg.sets.mods or "cmds,log,tdo")
+    scandir("mod", importer, Cfg.sets.mods or "cmds,log,shl,tdo")
     cli = CLI()
     command(cli, Cfg.otxt)
-    sys.stdout.flush()
+
+
+wrap(main)
