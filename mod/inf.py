@@ -35,19 +35,19 @@ def flt(event):
 
 def thr(event):
     result = []
-    for thr in sorted(threading.enumerate(), key=lambda x: x.getName()):
-        if str(thr).startswith("<_"):
+    for thread in sorted(threading.enumerate(), key=lambda x: x.getName()):
+        if str(thread).startswith("<_"):
             continue
         obj = Object()
-        update(obj, vars(thr))
+        update(obj, vars(thread))
         if getattr(obj, "sleep", None):
-            upt = obj.sleep - int(time.time() - obj.state["latest"])
+            uptime = obj.sleep - int(time.time() - obj.state["latest"])
         else:
-            upt = int(time.time() - obj.starttime)
-        result.append((upt, thr.getName()))
+            uptime = int(time.time() - obj.starttime)
+        result.append((uptime, thread.name))
     res = []
-    for upt, txt in sorted(result, key=lambda x: x[0]):
-        res.append("%s/%s" % (txt, elapsed(upt)))
+    for uptime, txt in sorted(result, key=lambda x: x[0]):
+        res.append("%s/%s" % (txt, elapsed(uptime)))
     if res:
         event.reply(" ".join(res))
     else:

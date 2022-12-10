@@ -8,8 +8,7 @@
 import time
 
 
-from opr import Wd, elapsed, fntime, keys, printable
-from opr import find as fnd
+from opr import Wd, elapsed, find, fntime, keys, printable
 
 
 def __dir__():
@@ -27,7 +26,7 @@ def fnd(event):
         return
     otype = event.args[0]
     nmr = 0
-    for obj in fnd(otype, event.gets):
+    for obj in find(otype, event.gets):
         txt = "%s %s %s" % (
                             str(nmr),
                             printable(obj, event.sets.keys or keys(obj), event.toskip),

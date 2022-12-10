@@ -59,6 +59,8 @@ class Thread(threading.Thread):
         func, args = self.queue.get()
         if args:
             self._evt = args[0]
+            if self._evt.cmd:
+                self.name = self._evt.cmd
         self.starttime = time.time()
         self._result = func(*args)
 
