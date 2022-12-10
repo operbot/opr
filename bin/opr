@@ -16,17 +16,20 @@ sys.path.insert(0, os.getcwd())
 
 
 from opr import Cfg, CLI, Command, Wd
-from opr import command, launch, parse, scan, scandir, wait
+from opr import command, launch, parse, scan, scandir, scanpkg, wait
 from opr import boot, importer, wrap
+
+
+import opmod
 
 
 Wd.workdir = os.path.expanduser("~/.opr")
 
 
-
 def main():
     boot(" ".join(sys.argv[1:]))
-    scandir("mod", importer, Cfg.sets.mods or "cmds,log,shl,tdo")
+    scanpkg(opmod, importer, Cfg.sets.mods or "cmds,log,shl,tdo")
+    scandir("mod", importer, Cfg.sets.mods)
     cli = CLI()
     command(cli, Cfg.otxt)
 

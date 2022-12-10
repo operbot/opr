@@ -39,7 +39,8 @@ setup(
     long_description=read(),
     long_description_content_type="text/x-rst",
     license="Public Domain",
-    packages=["opr"],
+    packages=["opr", "opmod"],
+    scripts=["bin/opr"],
     classifiers=[
         "Development Status :: 4 - Beta",
         "License :: Public Domain",

@@ -29,6 +29,7 @@ def __dir__():
             'parse',
             'scan',
             'scandir',
+            'scanpkg',
             'skip',
             'starttime',
             'wait'
@@ -282,6 +283,12 @@ def scandir(path, func, mods=None, init=False):
         path2 = os.path.join(path, fnm)
         res.append(func(pname, mname, path2, init))
     return res
+
+
+def scanpkg(pkg, func, mods=None, init=False):
+    if mods is None:
+        mods = ""
+    scandir(pkg.__path__[0], func, mods, init)
 
 
 def skip(name, names):
