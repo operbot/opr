@@ -98,6 +98,7 @@ def wrap(func):
 def main():
     boot()
     scandir(Wd.moddir(), importer, "mod", Cfg.mods)
+    scandir("mod", importer, "mod", Cfg.mods)
     cli = CLI()
     command(cli, Cfg.prs.otxt)
 

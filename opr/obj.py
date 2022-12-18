@@ -524,7 +524,7 @@ class Wd:
 
     @staticmethod
     def moddir():
-        return os.path.join(Wd.get(), "modz")
+        return os.path.join(Wd.get(), "mod")
 
     @staticmethod
     def set(path):

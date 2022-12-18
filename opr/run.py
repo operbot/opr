@@ -64,12 +64,14 @@ def include(name, namelist):
 
 
 def listmod(path):
+    res = []
     if not os.path.exists(path):
-        yield None
+        return res
     for fnm in os.listdir(path):
         if fnm.endswith("~") or fnm.startswith("__"):
             continue
-        yield fnm.split(os.sep)[-1][:-3]
+        res.append(fnm.split(os.sep)[-1][:-3])
+    return res
 
 
 def parse(txt=None):
