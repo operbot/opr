@@ -1,37 +1,105 @@
 #!/usr/bin/env python3
 # This file is placed in the Public Domain.
-# pylint: disable=C0116,C0413,W0212
+# pylint: disable=C0116,C0413,W0212,W0406
 
 
-"write your own commands"
+"object programming runtime"
 
 
 import importlib
 import importlib.util
 import os
+import readline
 import sys
+import termios
+import traceback
 
 
 sys.path.insert(0, os.getcwd())
 
 
-from opr import Cfg, CLI, Command, Wd
-from opr import command, launch, parse, scan, scandir, scanpkg, wait
-from opr import boot, importer, wrap
+from opr.hdl import Command, Handler
+from opr.obj import Wd, last, save
+from opr.run import Cfg, boot, command, scanner, scandir, wait
+from opr.thr import launch
 
 
-import opmod
-
-
+Cfg.name = "opr"
 Wd.workdir = os.path.expanduser("~/.opr")
 
 
+class CLI(Handler):
+
+    @staticmethod
+    def announce(txt):
+        pass
+
+    @staticmethod
+    def raw(txt):
+        print(txt)
+        sys.stdout.flush()
+
+
+def daemon():
+    pid = os.fork()
+    if pid != 0:
+        os._exit(0)
+    os.setsid()
+    os.umask(0)
+    sis = open("/dev/null", 'r')
+    os.dup2(sis.fileno(), sys.stdin.fileno())
+    if not Cfg.verbose:
+        sos = open("/dev/null", 'a+')
+        ses = open("/dev/null", 'a+')
+        os.dup2(sos.fileno(), sys.stdout.fileno())
+        os.dup2(ses.fileno(), sys.stderr.fileno())
+
+
+def importer(mname, path):
+    spec = importlib.util.find_spec(mname)
+    if spec:
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        if "init" in dir(mod):
+            launch(mod.init)
+        return mod
+    return None
+
+
+def print_exc(ex):
+    traceback.print_exception(type(ex), ex, ex.__traceback__)
+
+
+def setcompleter(optionlist):
+    completer = Completer(optionlist)
+    readline.set_completer(completer.complete)
+    readline.parse_and_bind("tab: complete")
+    atexit.register(lambda: readline.set_completer(None))
+
+
+def wrap(func):
+    fds = sys.stdin.fileno()
+    gotterm = True
+    try:
+        old = termios.tcgetattr(fds)
+    except termios.error:
+        gotterm = False
+    try:
+        func()
+    except (EOFError, KeyboardInterrupt):
+        print("")
+    finally:
+        if gotterm:
+            termios.tcsetattr(fds, termios.TCSADRAIN, old)
+        for evt in Command.errors:
+            print_exc(evt.__exc__)
+
+
 def main():
-    boot(" ".join(sys.argv[1:]))
-    scanpkg(opmod, importer, Cfg.sets.mods or "cmds,log,shl,tdo")
-    scandir("mod", importer, Cfg.sets.mods)
+    boot()
+    scandir(Wd.moddir(), importer, "mod", Cfg.mods)
     cli = CLI()
-    command(cli, Cfg.otxt)
+    command(cli, Cfg.prs.otxt)
 
 
 wrap(main)

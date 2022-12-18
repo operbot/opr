@@ -8,10 +8,10 @@
 import unittest
 
 
-from opr.object import fntime
+from opr.obj import fntime
 
 
-FN = "opr.handler.Event/45722f80dfec4867a1faf82bea059db0/2022-04-11/22:40:31.259218"
+FN = "opr.msg.Event/45722f80dfec4867a1faf82bea059db0/2022-04-11/22:40:31.259218"
 
 
 class TestPath(unittest.TestCase):

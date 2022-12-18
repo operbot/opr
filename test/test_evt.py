@@ -5,19 +5,10 @@
 "event"
 
 
-__version__ = "1"
-
-
-## imports
-
-
 import unittest
 
 
-from opr.handler import Event
-
-
-## classes
+from opr.msg import Event
 
 
 class TestEvent(unittest.TestCase):

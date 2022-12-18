@@ -5,19 +5,10 @@
 "handler"
 
 
-__version__ = "1"
-
-
-## imports
-
-
 import unittest
 
 
-from opr.handler import Handler
-
-
-## classes
+from opr.hdl import Handler
 
 
 class TestHandler(unittest.TestCase):

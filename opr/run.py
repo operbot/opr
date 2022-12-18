@@ -5,22 +5,14 @@
 "runtime"
 
 
-import atexit
-import importlib
-import importlib.util
 import os
-import readline
-import rlcompleter
 import sys
-import termios
 import time
-import traceback
 
 
-from .message import Event, Parsed
-from .handler import Handler, Command, scan
-from .objects import Default, Object, last, spl, update
-from .threads import launch
+from .hdl import scan
+from .msg import Event, Parsed
+from .obj import Default, spl, update
 
 
 def __dir__():
@@ -72,9 +64,8 @@ def include(name, namelist):
 
 
 def listmod(path):
-    res = []
     if not os.path.exists(path):
-        return res
+        yield None
     for fnm in os.listdir(path):
         if fnm.endswith("~") or fnm.startswith("__"):
             continue

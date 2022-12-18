@@ -10,18 +10,18 @@ import unittest
 import _thread
 
 
-import opr.object
+import opr.obj
 
 
-from opr.object import *
-from opr.handler import *
-from opr.thread import *
+from opr.obj import *
+from opr.hdl import *
+from opr.thr import *
 
 
 Wd.workdir = ".test"
 
 
-FN = "opr.object.Object/1dd93ecc467d467c98092239055e926c/2022-04-11/22:40:31.259218"
+FN = "opr.obj.Object/1dd93ecc467d467c98092239055e926c/2022-04-11/22:40:31.259218"
 VALIDJSON = '{"test": "bla"}'
 
 
@@ -102,13 +102,13 @@ class TestObject(unittest.TestCase):
     #    save(obj)
 
     def test_match(self):
-        mtc = match("opr.object.Object", {"txt": "test"})
+        mtc = match("opr.obj.Object", {"txt": "test"})
         self.assertTrue(not mtc)
 
     def test_find(self):
         objs = find("object")
         if objs:
-            self.assertTrue("opr.object.Object" in repr(objs[0]))
+            self.assertTrue("opr.obj.Object" in repr(objs[0]))
         self.assertTrue(True)
 
     def test_default(self):
@@ -130,7 +130,7 @@ class TestObject(unittest.TestCase):
         self.assertEqual(jsn, '{"bla": "mekker"}')
 
     def test_interface(self):
-        self.assertTrue(dir(opr.object), attrs1)
+        self.assertTrue(dir(opr.obj), attrs1)
 
     def test_constructor(self):
         obj = Object()
@@ -199,7 +199,7 @@ class TestObject(unittest.TestCase):
 
     def test_kind(self):
         obj = Object()
-        self.assertEqual(kind(obj), "opr.object.Object")
+        self.assertEqual(kind(obj), "opr.obj.Object")
 
     def test_repr(self):
         self.assertTrue(update(Object(),
@@ -308,9 +308,9 @@ class TestDb(unittest.TestCase):
     def test_fns(self):
         obj = Object()
         save(obj)
-        fnms = fns("opr.object.Object")
+        fnms = fns("opr.obj.Object")
         if fnms:
-            self.assertTrue("opr.object.Object"  in fnms[0])
+            self.assertTrue("opr.obj.Object"  in fnms[0])
         self.assertTrue(True)
 
     def test_hook(self):

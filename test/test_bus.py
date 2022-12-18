@@ -5,19 +5,10 @@
 "bus"
 
 
-__version__ = "1"
-
-
-## imports
-
-
 import unittest
 
 
-from opr.handler import Bus, Handler
-
-
-## classes
+from opr.hdl import Bus, Handler
 
 
 class Client(Handler):
