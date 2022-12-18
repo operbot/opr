@@ -1,0 +1,35 @@
+#!/usr/bin/env python3
+# This file is placed in the Public Domain.
+
+
+"loop"
+
+
+import os
+import sys
+
+
+SKIP = ["env"]
+
+def loop(path, txt):
+    for fnn in os.listdir(path):
+        if fnn in SKIP:
+            continue
+        ppath = os.path.abspath(os.path.join(path, fnn))
+        if os.path.isdir(ppath):
+            loop(ppath, txt)
+            os.chdir(ppath)
+            popen(txt)
+            os.chdir("..")
+
+def popen(txt):
+    for line in os.popen(txt).readlines():
+        print(line.rstrip())
+        sys.stdout.flush()
+
+
+if __name__ == "__main__":
+    if not len(sys.argv) >= 3:
+        print("loop <dir> <cmd>")
+    else:
+        loop(sys.argv[1], " ".join(sys.argv[2:]))
