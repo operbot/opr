@@ -22,6 +22,7 @@ from opr.hdl import Bus
 from opr.obj import Class, Default, Object, Db, find, fntime, last, printable
 from opr.obj import register,  save, spl, update
 from opr.obj import locked, write
+from opr.run import Cfg
 from opr.thr import Repeater, elapsed, launch 
 
 

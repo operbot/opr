@@ -21,17 +21,19 @@ import _thread
 sys.path.insert(0, os.getcwd())
 
 
-from opr import Cfg, Client, Command, Event, Object, Wd
-from opr import launch, parse, scan, scandir, update
-from opr import elapsed, name
-from opr import locked
+from opr.hdl import Command, Handler, scan
+from opr.msg import Event
+from opr.obj import Object, Wd, locked, update
+from opr.run import Cfg, boot, parse, scandir
+from opr.thr import elapsed, launch, name
 
 
 paylock = _thread.allocate_lock()
 
 
-Wd.workdir = ".test"
 Cfg.debug = True
+Cfg.name = "tinder"
+Wd.workdir = ".test"
 
 
 errors = []
@@ -68,19 +70,12 @@ def cprint(txt):
     sys.stdout.flush()
 
 
-class CLI(Client):
+class CLI(Handler):
 
     @staticmethod
     def raw(txt):
         if Cfg.verbose:
             cprint(txt)
-
-
-def boot():
-    txt = ' '.join(sys.argv[1:])
-    cfg = parse(txt)
-    update(Cfg, cfg)
-    return cfg
 
 
 def consume(evts):
@@ -105,16 +100,15 @@ def from_exception(ex, txt="", sep=" "):
     return res.strip()
 
 
-def importer(pname, mname, path=None):
-    if not path:
-        path = pname
-    mod = None
-    spec = importlib.util.spec_from_file_location(mname, path)
+def importer(mname, path):
+    spec = importlib.util.find_spec(mname)
     if spec:
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
-        scan(mod)
-    return mod
+        if "init" in dir(mod):
+            launch(mod.init)
+        return mod
+    return None
 
 
 @locked(paylock)
@@ -154,10 +148,10 @@ def wrap(func):
 def main():
     if os.path.exists(Cfg.workdir):
         shutil.rmtree(Cfg.workdir)
-    cfg = boot()
-    scandir("mod", importer)
+    boot()
+    scandir("mod", importer, "mod")
     cli = CLI()
-    nrs = cfg.index or 1
+    nrs = Cfg.prs.index or 1
     starttime = time.time()
     waiters = []
     res = 1
