@@ -2,7 +2,7 @@
 # pylint: disable=C0112,C0115,C0116,W0613,W0108,R0903
 
 
-"""object programming runtime
+"""big Object
 
 
 this module contains a big Object class that provides a clean, no methods,
@@ -12,8 +12,8 @@ the object, is easily being updated from a on disk stored json (dict).
 
 basic usage is this:
 
->>> import opr
->>> o = opr.Object()
+>>> import cmdz
+>>> o = cmdz.Object()
 >>> o.key = "value"
 >>> o.key
 'value'
@@ -23,7 +23,7 @@ like get, items, keys, register, set, update and values.
 
 load/save from/to disk:
 
->>> from opr import Object, load, save
+>>> from cmdz import Object, load, save
 >>> o = Object()
 >>> o.key = "value"
 >>> p = save(o)
@@ -35,12 +35,12 @@ load/save from/to disk:
 big Objects can be searched with database functions and uses read-only files
 to improve persistence and a type in filename for reconstruction:
 
-'opr.object.Object/11ee5f11bd874f1eaa9005980f9d7a94/2021-08-31/15:31:05.717063'
+'cmdz.object.Object/11ee5f11bd874f1eaa9005980f9d7a94/2021-08-31/15:31:05.717063'
 
->>> from opr import Object, save
+>>> from cmdz import Object, save
 >>> o = Object()
 >>> save(o)  # doctest: +ELLIPSIS
-'opr.object.Object/...'
+'cmdz.object.Object/...'
 
 great for giving objects peristence by having their state stored in files.
 
@@ -48,6 +48,7 @@ great for giving objects peristence by having their state stored in files.
 
 
 import datetime
+import inspect
 import json
 import os
 import pathlib
@@ -84,6 +85,7 @@ def __dir__():
             'printable',
             'register',
             'save',
+            'scan',
             'spl',
             'update',
             'values',
@@ -134,7 +136,9 @@ class Object:
         )
         if args:
             val = args[0]
-            if isinstance(val, zip):
+            if isinstance(val, list):
+                update(self, dict(val))
+            elif isinstance(val, zip):
                 update(self, dict(val))
             elif isinstance(val, dict):
                 update(self, val)
@@ -465,7 +469,10 @@ def search(obj, selector):
     res = False
     select = Object(selector)
     for key, value in items(select):
-        val = getattr(obj, key)
+        try:
+            val = getattr(obj, key)
+        except AttributeError:
+            continue
         if str(value) in str(val):
             res = True
             break
@@ -517,7 +524,7 @@ class Wd:
 
     @staticmethod
     def moddir():
-        return os.path.join(Wd.get(), "mod")
+        return os.path.join(Wd.get(), "modz")
 
     @staticmethod
     def set(path):
@@ -546,6 +553,11 @@ def cdir(path):
         path = os.path.dirname(path)
     ppp = pathlib.Path(path)
     ppp.mkdir(parents=True, exist_ok=True)
+
+
+def scan(mod):
+    for _key, clz in inspect.getmembers(mod, inspect.isclass):
+        Class.add(clz)
 
 
 def spl(txt):
