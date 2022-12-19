@@ -12,8 +12,8 @@ import threading
 import time
 
 
-from .obj import Object
-from .thr import launch
+from .objects import Object
+from .threads import launch
 
 
 def __dir__():

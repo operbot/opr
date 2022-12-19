@@ -8,8 +8,8 @@
 import time
 
 
-from opr.obj import Wd, find, fntime, keys, printable
-from opr.thr import elapsed
+from opr.objects import Wd, find, fntime, keys, printable
+from opr.threads import elapsed
 
 
 def __dir__():

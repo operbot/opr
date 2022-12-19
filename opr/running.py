@@ -10,9 +10,9 @@ import sys
 import time
 
 
-from .hdl import scan
-from .msg import Event, Parsed
-from .obj import Default, spl, update
+from .handler import scan
+from .message import Event, Parsed
+from .objects import Default, spl, update
 
 
 def __dir__():

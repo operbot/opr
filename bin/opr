@@ -1,27 +1,30 @@
 #!/usr/bin/env python3
 # This file is placed in the Public Domain.
-# pylint: disable=C0116,C0413,W0212,W0406
+# pylint: disable=C0116,C0413,W0212,C0301,W0613
 
 
-"object programming runtime"
+"shell"
 
 
+import atexit
 import importlib
 import importlib.util
 import os
 import readline
+import rlcompleter
 import sys
+import time
 import termios
-import traceback
 
 
 sys.path.insert(0, os.getcwd())
 
 
-from opr.hdl import Command, Handler
-from opr.obj import Wd, last, save
-from opr.run import Cfg, boot, command, scanner, scandir, wait
-from opr.thr import launch
+from opr.message import Event
+from opr.handler import Command, Handler
+from opr.objects import Wd, printable
+from opr.running import Cfg, boot, command, scandir, scanner
+from opr.threads import launch
 
 
 Cfg.name = "opr"
@@ -40,6 +43,52 @@ class CLI(Handler):
         sys.stdout.flush()
 
 
+
+class Console(Handler):
+
+    @staticmethod
+    def announce(txt):
+        pass
+
+    @staticmethod
+    def handle(event):
+        Command.handle(event)
+        event.wait()
+
+    def poll(self):
+        event = Event()
+        event.txt = input("> ")
+        event.orig = repr(self)
+        return event
+
+    @staticmethod
+    def raw(txt):
+        print(txt)
+        sys.stdout.flush()
+
+
+class Completer(rlcompleter.Completer):
+
+    def __init__(self, options):
+        rlcompleter.Completer.__init__(self)
+        self.matches = []
+        self.options = options
+
+    def complete(self, text, state):
+        if state == 0:
+            if text:
+                self.matches = [
+                                s for s in self.options
+                                if s and s.startswith(text)
+                               ]
+            else:
+                self.matches = self.options[:]
+        try:
+            return self.matches[state]
+        except IndexError:
+            return None
+
+
 def daemon():
     pid = os.fork()
     if pid != 0:
@@ -56,6 +105,8 @@ def daemon():
 
 
 def importer(mname, path):
+    if mname not in Cfg.mod:
+        return None
     spec = importlib.util.find_spec(mname)
     if spec:
         mod = importlib.util.module_from_spec(spec)
@@ -68,6 +119,13 @@ def importer(mname, path):
 
 def print_exc(ex):
     traceback.print_exception(type(ex), ex, ex.__traceback__)
+
+
+def setcompleter(optionlist):
+    completer = Completer(optionlist)
+    readline.set_completer(completer.complete)
+    readline.parse_and_bind("tab: complete")
+    atexit.register(lambda: readline.set_completer(None))
 
 
 def setcompleter(optionlist):
@@ -97,10 +155,16 @@ def wrap(func):
 
 def main():
     boot()
-    scandir(Wd.moddir(), importer, "mod", Cfg.mods)
-    scandir("mod", importer, "mod", Cfg.mods)
-    cli = CLI()
-    command(cli, Cfg.prs.otxt)
-
+    scandir("mod", importer, "mod")
+    setcompleter(Command.cmd)
+    if Cfg.prs.txt:
+        cli = CLI()
+        return command(cli, Cfg.prs.otxt)
+    if Cfg.console:
+        date = time.ctime(time.time()).replace("  ", " ")
+        print("%s started at %s %s" % (Cfg.name.upper(), date, printable(Cfg, plain=True)))
+        cli = Console()
+        cli.start()
+     
 
 wrap(main)

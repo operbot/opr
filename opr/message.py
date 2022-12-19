@@ -9,9 +9,9 @@ import threading
 import time
 
 
-from .obj import Default, register
-from .hdl import Bus
-from .thr import elapsed
+from .objects import Default, register
+from .handler import Bus
+from .threads import elapsed
 
 
 def __dir__():
