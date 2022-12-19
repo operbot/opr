@@ -1,63 +1,45 @@
 # This file is placed in the Public Domain.
-# pylint: disable=C0115,C0116,W0401,W0621,W0614,W1503,R0904,E1101
+# pylint: disable=E1101,C0116,C0411,R0904,C0115
 
 
-"object"
+"objects"
 
 
+import json
 import os
 import unittest
-import _thread
 
 
-import opr.obj
-
-
-from opr.obj import *
-from opr.hdl import *
-from opr.thr import *
+from opr.objects import Object, Wd, items, keys, register, update, values
+from opr.objects import edit, kind, load, save
+from opr.objects import ObjectDecoder, ObjectEncoder
+from opr.objects import printable
 
 
 Wd.workdir = ".test"
 
 
-FN = "opr.obj.Object/1dd93ecc467d467c98092239055e926c/2022-04-11/22:40:31.259218"
 VALIDJSON = '{"test": "bla"}'
 
 
-testlock = _thread.allocate_lock()
-
-
 attrs1 = (
-            'Class',
-            'Db',
-            'Default',
-            'Object',
-            'ObjectDecoder',
-            'ObjectEncoder',
-            'Wd',
-            'cdir',
-            'dump',
-            'dumps',
-            'edit',
-            'find',
-            'fns',
-            'fntime',
-            'hook',
-            'items',
-            'keys',
-            'kind',
-            'last',
-            'load',
-            'loads',
-            'match',
-            'name',
-            'printable',
-            'register',
-            'save',
-            'update',
-            'values',
-     )
+         'Object',
+         'Wd',
+         'clear',
+         'copy',
+         'fromkeys',
+         'get',
+         'items',
+         'keys',
+         'matchkey',
+         'pop',
+         'popitem',
+         "register",
+         'save',
+         'setdefault',
+         'update',
+         'values',
+        )
 
 attrs2 = (
           '__class__',
@@ -95,42 +77,15 @@ attrs2 = (
          )
 
 
+def dumps(name):
+    return json.dumps(name, cls=ObjectEncoder)
+
+
+def loads(name):
+    return json.loads(name, cls=ObjectDecoder)
+
+
 class TestObject(unittest.TestCase):
-
-    #def setUp(self):
-    #    obj = Object()
-    #    save(obj)
-
-    def test_match(self):
-        mtc = match("opr.obj.Object", {"txt": "test"})
-        self.assertTrue(not mtc)
-
-    def test_find(self):
-        objs = find("object")
-        if objs:
-            self.assertTrue("opr.obj.Object" in repr(objs[0]))
-        self.assertTrue(True)
-
-    def test_default(self):
-        dft = Default()
-        self.assertEqual(type(dft), Default)
-
-    def test_name(self):
-        obj = Object()
-        self.assertEqual(name(obj), "Object")
-
-    def test_decoder(self):
-        obj = ObjectDecoder().decode('{"bla": "mekker"}')
-        self.assertEqual(obj.bla, "mekker")
-
-    def test_encoder(self):
-        obj = Object()
-        obj.bla = "mekker"
-        jsn = ObjectEncoder().encode(obj)
-        self.assertEqual(jsn, '{"bla": "mekker"}')
-
-    def test_interface(self):
-        self.assertTrue(dir(opr.obj), attrs1)
 
     def test_constructor(self):
         obj = Object()
@@ -161,6 +116,10 @@ class TestObject(unittest.TestCase):
         self.assertEqual(
             dir(obj), list(attrs2)
         )
+
+    def test_doc(self):
+        obj = Object()
+        self.assertEqual(obj.__doc__, None)
 
     def test_format(self):
         obj = Object()
@@ -195,11 +154,10 @@ class TestObject(unittest.TestCase):
         self.assertEqual(len(obj), 0)
 
     def test_module(self):
-        self.assertTrue(Object().__module__, "obj")
+        self.assertTrue(Object().__module__, "op")
 
     def test_kind(self):
-        obj = Object()
-        self.assertEqual(kind(obj), "opr.obj.Object")
+        self.assertEqual(kind(Object()), "opr.objects.Object")
 
     def test_repr(self):
         self.assertTrue(update(Object(),
@@ -225,9 +183,9 @@ class TestObject(unittest.TestCase):
 
     def test_printable(self):
         obj = Object()
-        self.assertEqual(printable(obj, keys(obj)), "")
+        self.assertEqual(printable(obj), "")
 
-    def test_get(self):
+    def test_getattr(self):
         obj = Object()
         obj.key = "value"
         self.assertEqual(getattr(obj, "key"), "value")
@@ -263,6 +221,7 @@ class TestObject(unittest.TestCase):
         obj.test = "bla"
         self.assertEqual(dumps(obj), VALIDJSON)
 
+
     def test_load(self):
         obj = Object()
         obj.key = "value"
@@ -277,6 +236,7 @@ class TestObject(unittest.TestCase):
         self.assertEqual(obj.key, "value")
 
     def test_save(self):
+        Wd.workdir = ".test"
         obj = Object()
         path = save(obj)
         self.assertTrue(os.path.exists(os.path.join(Wd.workdir, "store", path)))
@@ -297,54 +257,3 @@ class TestObject(unittest.TestCase):
                 "value",
             ],
         )
-
-
-class TestDb(unittest.TestCase):
-
-    def test_cdir(self):
-        cdir(".test")
-        self.assertTrue(os.path.exists(".test"))
-
-    def test_fns(self):
-        obj = Object()
-        save(obj)
-        fnms = fns("opr.obj.Object")
-        if fnms:
-            self.assertTrue("opr.obj.Object"  in fnms[0])
-        self.assertTrue(True)
-
-    def test_hook(self):
-        obj = Object()
-        obj.key = "value"
-        pth = save(obj)
-        oobj = hook(pth)
-        self.assertEqual(oobj.key, "value")
-
-    def test_last(self):
-        oobj = Object()
-        oobj.key = "value"
-        save(oobj)
-        last(oobj)
-        self.assertEqual(oobj.key, "value")
-
-
-
-class TestPath(unittest.TestCase):
-
-    def test_path(self):
-        fnt = fntime(FN)
-        self.assertEqual(fnt, 1649709631.259218)
-
-
-class TestJSON(unittest.TestCase):
-
-    def test_json(self):
-        obj = Object()
-        obj.test = "bla"
-        res = loads(dumps(obj))
-        self.assertEqual(res.test, "bla")
-
-    def test_jsondump(self):
-        obj = Object()
-        obj.test = "bla"
-        self.assertEqual(dumps(obj), VALIDJSON)

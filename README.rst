@@ -15,7 +15,7 @@ README
 
 **INSTALL**
 
-``pip3 install opr --upgrade --force-reinstall``
+``pip3 install opr``
 
 
 **DESCRIPTION**
@@ -30,13 +30,6 @@ last version saved on disk is served to the user layer. Files are JSON dumps
 that are read-only so thus should provide (disk) persistence. Paths carry the
 type in the path name what makes reconstruction from filename easier then
 reading type from the object.
-
-
-**CONFIGURATION**
-
-``opr`` looks for it's modules in ~/.opr/mod. A collection of sample modules 
-can be found in /usr/local/opr/mod. Copy what modules you want to ~/.opr/mod,
-or write your own modules and put them in ~/.opr/mod. 
 
 
 **PROGRAMMING**
@@ -74,10 +67,10 @@ load/save from/to disk::
 
 great for giving objects peristence by having their state stored in files::
 
->>> from opr import Object, save
->>> o = Object()
->>> save(o)
->>> 'opr.Object/c13c5369-8ada-44a9-80b3-4641986f09df/2021-08-31/15:31:05.717063'
+ >>> from opr import Object, save
+ >>> o = Object()
+ >>> save(o)
+ 'opr.objects.Object/c13c5369-8ada-44a9-80b3-4641986f09df/2021-08-31/15:31:05.7'
 
 
 **AUTHOR**

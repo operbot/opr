@@ -31,7 +31,7 @@ def uploadlist(dir):
 
 setup(
     name="opr",
-    version="7",
+    version="8",
     author="Bart Thate",
     author_email="operbot100@gmail.com",
     url="http://github.com/operbot/opr",
@@ -39,8 +39,7 @@ setup(
     long_description=read(),
     long_description_content_type="text/x-rst",
     license="Public Domain",
-    packages=["opr", "opmod"],
-    scripts=["bin/opr"],
+    packages=["opr"],
     classifiers=[
         "Development Status :: 4 - Beta",
         "License :: Public Domain",

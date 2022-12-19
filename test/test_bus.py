@@ -1,5 +1,5 @@
 # This file is placed in the Public Domain.
-# pylint: disable=E1101,C0115,C0116,C0411,R0903,R0904
+# pylint: disable=C0115,C0116
 
 
 "bus"
@@ -8,42 +8,45 @@
 import unittest
 
 
-from opr.hdl import Bus, Handler
+from opr.handler import Bus, Handler
 
 
 class Client(Handler):
 
     gotcha = False
 
+    def __init__(self):
+        Handler.__init__(self)
+        self.orig = repr(self)
+
+    def announce(self, txt):
+        self.raw(txt)
+
     def raw(self, txt):
         Client.gotcha = True
 
+    def say(self, channel, txt):
+        self.raw(txt)
+
+
 class TestBus(unittest.TestCase):
 
-    def test_construct(self):
-        bus = Bus()
-        self.assertEqual(type(bus), Bus)
+    def setUp(self):
+        Client.gotcha = False
 
     def test_add(self):
-        bus = Bus()
         clt = Client()
-        bus.add(clt)
-        self.assertTrue(clt in bus.objs)
+        self.assertTrue(clt in Bus.objs)
 
     def test_announce(self):
-        bus = Bus()
-        clt = Client()
-        bus.add(clt)
-        bus.announce("test")
+        Bus.announce("test")
         self.assertTrue(Client.gotcha)
 
     def test_byorig(self):
         clt = Client()
-        self.assertEqual(Bus.byorig(repr(clt)), clt)
+        self.assertEqual(Bus.byorig(clt.orig), clt)
 
     def test_say(self):
-        bus = Bus()
         clt = Client()
-        bus.add(clt)
-        bus.say(repr(clt), "#test", "test")
+        Bus.say(clt.orig, "#test", "test")
         self.assertTrue(Client.gotcha)

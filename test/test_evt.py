@@ -1,5 +1,5 @@
 # This file is placed in the Public Domain.
-# pylint: disable=E1101,C0115,C0116,C0411,R0903,R0904
+# pylint: disable=C0115,C0116
 
 
 "event"
@@ -8,7 +8,7 @@
 import unittest
 
 
-from opr.msg import Event
+from opr.message import Event
 
 
 class TestEvent(unittest.TestCase):
