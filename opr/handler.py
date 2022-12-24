@@ -12,8 +12,9 @@ import threading
 import time
 
 
-from .objects import Object
-from .threads import launch
+from .obj import Object
+from .thr import launch
+from .usr import Users
 
 
 def __dir__():
@@ -73,6 +74,9 @@ class Callback(Object):
         if not func:
             event.ready()
             return
+        if "perm" in dir(func):
+            if not Users.allowed(event.userhost, func.perm):
+                return
         event.__thr__ = launch(func, event)
 
     def dispatch(self, event):

@@ -12,8 +12,8 @@ the object, is easily being updated from a on disk stored json (dict).
 
 basic usage is this:
 
->>> import cmdz
->>> o = cmdz.Object()
+>>> import op
+>>> o = op.Object()
 >>> o.key = "value"
 >>> o.key
 'value'
@@ -23,7 +23,7 @@ like get, items, keys, register, set, update and values.
 
 load/save from/to disk:
 
->>> from cmdz import Object, load, save
+>>> from op import Object, load, save
 >>> o = Object()
 >>> o.key = "value"
 >>> p = save(o)
@@ -35,12 +35,12 @@ load/save from/to disk:
 big Objects can be searched with database functions and uses read-only files
 to improve persistence and a type in filename for reconstruction:
 
-'cmdz.object.Object/11ee5f11bd874f1eaa9005980f9d7a94/2021-08-31/15:31:05.717063'
+'op.obj.Object/11ee5f11bd874f1eaa9005980f9d7a94/2021-08-31/15:31:05.717063'
 
->>> from cmdz import Object, save
+>>> from op import Object, save
 >>> o = Object()
 >>> save(o)  # doctest: +ELLIPSIS
-'cmdz.object.Object/...'
+'op.obj.Object/...'
 
 great for giving objects peristence by having their state stored in files.
 
@@ -524,7 +524,15 @@ class Wd:
 
     @staticmethod
     def moddir():
-        return os.path.join(Wd.get(), "mod")
+        mdr = os.path.join(Wd.get(), "mod")
+        cdir(mdr)
+        return mdr
+
+    @staticmethod
+    def nmdir():
+        mdr = os.path.join(Wd.get(), "notmod")
+        cdir(mdr)
+        return mdr
 
     @staticmethod
     def set(path):
@@ -549,7 +557,9 @@ class Wd:
 
 
 def cdir(path):
-    if not os.path.isdir(path):
+    path = os.path.abspath(path)
+    fname = path.split(os.sep)[-1]
+    if fname.count(":") == 2:
         path = os.path.dirname(path)
     ppp = pathlib.Path(path)
     ppp.mkdir(parents=True, exist_ok=True)

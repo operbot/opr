@@ -9,9 +9,9 @@ import threading
 import time
 
 
-from .objects import Default, register
-from .handler import Bus
-from .threads import elapsed
+from .obj import Default, register
+from .hdl import Bus
+from .thr import elapsed
 
 
 def __dir__():
@@ -96,9 +96,9 @@ class Event(Parsed):
         Bus.say(self.orig, self.channel, f'ok {diff}')
 
     def ok(self, txt=None):
-        text = "ok " + txt or ""
+        text = "ok " + (txt or "")
         text = text.rstrip()
-        Bus.say(self.orig, self.channel, txt)
+        Bus.say(self.orig, self.channel, text)
 
     def ready(self):
         self.__ready__.set()
