@@ -2,7 +2,7 @@
 # pylint: disable=C0112,C0115,C0116,R0902
 
 
-"thread"
+"threads"
 
 
 import queue

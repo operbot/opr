@@ -2,16 +2,16 @@
 # pylint: disable=C0115,C0116,W0703,W0201,R0902,R0903,W0613,R0201,C0103,E0402
 
 
-"event"
+"message"
 
 
 import threading
 import time
 
 
-from .obj import Default, register
-from .hdl import Bus
-from .thr import elapsed
+from .objects import Default, register
+from .handler import Bus
+from .threads import elapsed
 
 
 def __dir__():

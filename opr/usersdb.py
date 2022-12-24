@@ -8,8 +8,8 @@
 import time
 
 
-from .obj import Class, Object, find, fntime, match, save, update, write
-from .thr import elapsed
+from .objects import Class, Object, find, fntime, match, save, update, write
+from .threads import elapsed
 
 
 def __dir__():

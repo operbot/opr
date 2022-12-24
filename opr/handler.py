@@ -12,9 +12,9 @@ import threading
 import time
 
 
-from .obj import Object
-from .thr import launch
-from .usr import Users
+from .objects import Object
+from .threads import launch
+from .usersdb import Users
 
 
 def __dir__():
