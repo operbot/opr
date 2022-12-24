@@ -1,0 +1,106 @@
+#!/usr/bin/env python3
+# This file is placed in the Public Domain.
+# pylint: disable=C0115,C0116,C0413,W0212,C0301,W0613,E0611,E0401
+
+
+"Object Programming Runtime Dameon (oprd)"
+
+
+## imports
+
+
+import importlib
+import os
+import sys
+import traceback
+
+
+sys.path.insert(0, os.getcwd())
+
+
+from op import Cfg, Command, Wd, launch, scan, scandir, wait, __version__
+
+
+## defines
+
+
+Cfg.name = "oprd"
+Wd.workdir = os.path.expanduser("~/.opr")
+
+
+## utilities
+
+
+def daemon():
+    pid = os.fork()
+    if pid != 0:
+        os._exit(0)
+    os.setsid()
+    os.umask(0)
+    sis = open("/dev/null", 'r')
+    os.dup2(sis.fileno(), sys.stdin.fileno())
+    if not Cfg.verbose:
+        sos = open("/dev/null", 'a+')
+        ses = open("/dev/null", 'a+')
+        os.dup2(sos.fileno(), sys.stdout.fileno())
+        os.dup2(ses.fileno(), sys.stderr.fileno())
+
+
+def importer(mname, path=None):
+    if path is None:
+        spec = importlib.util.find_spec(mname)
+    else:
+        spec = importlib.util.spec_from_file_location(mname, path)
+    if spec:
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+    return None
+
+
+def initer(mname, path=None):
+    mod = importer(mname, path)
+    if mod and "init" in dir(mod):
+        thr = launch(mod.init)
+        thr.join()
+    scan(mod)
+
+
+def scanner(mname, path=None):
+    mod = importer(mname, path)
+    scan(mod)
+
+
+def print_exc(ex):
+    traceback.print_exception(type(ex), ex, ex.__traceback__)
+
+
+def waiter():
+    for evt in Command.errors:
+        print_exc(evt.__exc__)
+
+
+## commands
+
+
+def cmd(event):
+    event.reply(",".join(Command.cmd))
+
+
+def ver(event):
+    event.reply("%s version %s" % (Cfg.name, __version__))
+
+
+## runtime
+
+
+def main():
+    daemon()
+    Command.add(cmd)
+    Command.add(ver)
+    scandir(Wd.moddir(), scanner, "mod")
+    scandir(Wd.moddir(), initer, "mod")
+    wait(waiter)
+
+
+main()
