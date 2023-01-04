@@ -5,9 +5,7 @@
 "handler"
 
 
-import inspect
 import queue
-import sys
 import threading
 import time
 
@@ -23,11 +21,11 @@ def __dir__():
             'Callback',
             'Command',
             'Handler',
-            'scan',
            )
 
 
 __all__ = __dir__()
+
 
 
 class Bus(Object):
@@ -108,8 +106,7 @@ class Command(Object):
             try:
                 func(evt)
             except Exception as ex:
-                tbk = sys.exc_info()[2]
-                evt.__exc__ = ex.with_traceback(tbk)
+                evt.__exc__ = ex.with_traceback(ex.__traceback__)
                 Command.errors.append(evt)
                 evt.ready()
                 return None
@@ -172,12 +169,3 @@ class Handler(Callback):
     def wait(self):
         while 1:
             time.sleep(1.0)
-
-
-def scan(mod):
-    for key, cmd in inspect.getmembers(mod, inspect.isfunction):
-        if key.startswith("cb"):
-            continue
-        names = cmd.__code__.co_varnames
-        if "event" in names:
-            Command.add(cmd)
