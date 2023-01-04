@@ -33,7 +33,6 @@ from opr import boot, command, scandir, scanpkg, wait
 
 
 import opr
-import opr.modules
 
 
 ## defines
@@ -190,10 +189,10 @@ def main():
         daemon()
         Cfg.wait = True
     if Cfg.mod:
-        scanpkg(opr.modules, scanner, Cfg.mod)
-        scanpkg(opr.modules, initer, Cfg.mod)
+        scandir("mod", scanner, Cfg.mod, "mod")
+        scandir("mod", initer, Cfg.mod)
     if Cfg.prs.txt:
-        scanpkg(opr.modules, scanner)
+        scandir("mod", scanner)
         cli = CLI()
         return command(cli, Cfg.prs.otxt)
     if Cfg.console:

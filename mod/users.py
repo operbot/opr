@@ -8,7 +8,7 @@
 import time
 
 
-from .. import User, elapsed, find, fntime, match, save, write
+from opr import User, elapsed, find, fntime, match, save, write
 
 
 def dlt(event):
