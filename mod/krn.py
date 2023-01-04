@@ -1,41 +1,41 @@
-# This file is placed in the Public Domain
+# This file is placed in the Public Domain.
+# pylint: disable=C0115,C0116,E0402,E1101
 
 
-"config"
+"enable/disable modules"
 
 
-from opr.objects import last, printable, keys, edit, write
-from opr.running import Cfg
+from opr import Cfg, edit, keys, last, printable, write
 
 
 def __dir__():
     return (
-            "cfg",
-            "disable",
-            "enable"
-           ) 
+            "dis",
+            "ena",
+            "krn"
+           )
 
-
-def cfg(event):
+def krn(event):
     last(Cfg)
     if not event.sets:
         event.reply(printable(
                               Cfg,
                               keys(Cfg),
+                              skip="name,password,prs",
                              )
                    )
     else:
         edit(Cfg, event.sets)
         write(Cfg)
-        event.done()
+        event.ok()
 
 
-def disable(event):
+def dis(event):
     if not event.args:
-        event.reply("disable <modname>")
+        event.reply("dis <modname>")
         return
     name = event.args[0]
-    if name == "disable":
+    if name == "krn":
         event.reply("i won't disable myself")
         return
     Cfg.mod.replace(name, "")
@@ -44,14 +44,10 @@ def disable(event):
     event.ok()
 
 
-def enable(event):
+def ena(event):
     if not event.args:
-        event.reply("enable <modname>")
+        event.reply("ena <modname>")
         return
-    name = event.args[0]
-    if name == "enable":
-        event.reply("i won't enable myself")
-        return
-    Cfg.mod += ",name"
+    Cfg.mod += ",%s" % event.args[0]
     write(Cfg)
-    event.ok(newpath)
+    event.ok()
