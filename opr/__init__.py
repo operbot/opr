@@ -5,15 +5,13 @@
 "object programming"
 
 
-from genocide import message, handler, objects, runtime, threads, usersdb
-
-
-from genocide.message import *
-from genocide.handler import *
-from genocide.objects import *
-from genocide.runtime import *
-from genocide.threads import *
-from genocide.usersdb import *
+from opr import message, handler, objects, runtime, threads, usersdb
+from opr.message import *
+from opr.handler import *
+from opr.objects import *
+from opr.runtime import *
+from opr.threads import *
+from opr.usersdb import *
 
 
 def __dir__():

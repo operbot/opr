@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # This file is placed in the Public Domain.
-# pylint: disable=C0115,C0116,C0413,W0212,C0301,W0613,E0611,E0401
+# pylint: disable=C0103,C0115,C0116,C0413,W0212,C0301,W0613,E0611,E0401
 
 
-"object programming runtime"
+"Object Programming Runtime"
 
 
 ## imports
@@ -12,6 +12,7 @@
 import atexit
 import importlib
 import importlib.util
+import inspect
 import os
 import readline
 import rlcompleter
@@ -25,25 +26,28 @@ import traceback
 sys.path.insert(0, os.getcwd())
 
 
-from opr.message import Event
-from opr.handler import Command, Handler
-from opr.objects import Wd, cdir, edit, find, keys, last, printable, save, write
-from opr.objects import fntime
-from opr.running import Cfg, boot, command, scan, scandir, wait
-from opr.threads import elapsed, launch
-from opr.usersdb import User
-from opr.version import __version__
+from opr import Cfg, Command, Event, Handler, User, Wd
+from opr import Wd, cdir, edit, find, keys, last, printable, save, write
+from opr import elapsed, fntime, launch, match
+from opr import boot, command, scandir, scanpkg, wait
+
+
+import opr
+import opr.modules
 
 
 ## defines
 
 
+Cfg.banner = "Object Programming Runtime"
 Cfg.name = "opr"
+Cfg.version = "91"
+
+
 Wd.workdir = os.path.expanduser("~/.opr")
 
 
-moddir = "/usr/local/opr/mod"
-nmdir = "/usr/local/opr/notmod"
+date = time.ctime(time.time()).replace("  ", " ")
 
 
 ## classes
@@ -61,11 +65,7 @@ class CLI(Handler):
         sys.stdout.flush()
 
 
-class Console(Handler):
-
-    @staticmethod
-    def announce(txt):
-        pass
+class Console(CLI):
 
     @staticmethod
     def handle(event):
@@ -78,10 +78,8 @@ class Console(Handler):
         event.orig = repr(self)
         return event
 
-    @staticmethod
-    def raw(txt):
-        print(txt)
-        sys.stdout.flush()
+
+## completer
 
 
 class Completer(rlcompleter.Completer):
@@ -104,6 +102,13 @@ class Completer(rlcompleter.Completer):
             return self.matches[state]
         except IndexError:
             return None
+
+
+def setcompleter(optionlist):
+    completer = Completer(optionlist)
+    readline.set_completer(completer.complete)
+    readline.parse_and_bind("tab: complete")
+    atexit.register(lambda: readline.set_completer(None))
 
 
 ## utilities
@@ -141,23 +146,20 @@ def initer(mname, path=None):
     if mods and "init" in dir(mods):
         thr = launch(mods.init)
         thr.join()
-    scan(mods)
+
+
+def scan(mod):
+    for key, cmd in inspect.getmembers(mod, inspect.isfunction):
+        if key.startswith("cb"):
+            continue
+        names = cmd.__code__.co_varnames
+        if "event" in names:
+            Command.add(cmd)
 
 
 def scanner(mname, path=None):
     mods = importer(mname, path)
     scan(mods)
-
-
-def print_exc(ex):
-    traceback.print_exception(type(ex), ex, ex.__traceback__)
-
-
-def setcompleter(optionlist):
-    completer = Completer(optionlist)
-    readline.set_completer(completer.complete)
-    readline.parse_and_bind("tab: complete")
-    atexit.register(lambda: readline.set_completer(None))
 
 
 def wrap(func):
@@ -175,184 +177,38 @@ def wrap(func):
         if gotterm:
             termios.tcsetattr(fds, termios.TCSADRAIN, old)
         for evt in Command.errors:
-            print_exc(evt.__exc__)
-
-
-## commands
-
-
-def cfg(event):
-    last(Cfg)
-    if not event.sets:
-        event.reply(printable(
-                              Cfg,
-                              keys(Cfg),
-                              skip="name,password,prs",
-                             )
-                   )
-    else:
-        edit(Cfg, event.sets)
-        write(Cfg)
-        event.done()
-
-
-def cmd(event):
-    event.reply(",".join(Command.cmd))
-
-
-def dlt(event):
-    if not event.args:
-        event.reply("dlt <username>")
-        return
-    selector = {"user": event.args[0]}
-    for obj in find("user", selector):
-        obj.__deleted__ = True
-        save(obj)
-        event.done()
-        break
-
-
-def dis(event):
-    if not event.args:
-        event.reply("disable <modname>")
-        return
-    name = event.args[0]
-    if name == "disable":
-        event.reply("i won't disable myself")
-        return
-    name += ".py"
-    path = os.path.join(Wd.moddir(), name)
-    if not os.path.exists(path):
-        event.reply("can't find %s to disable" % name)
-        return
-    nmd = os.path.join(Wd.get(), "notmod")
-    cdir(nmd)
-    dest = os.path.join(nmd, name)
-    shutil.move(path, dest)
-    event.ok()
-
-
-def ena(event):
-    if not event.args:
-        event.reply("enable <modname>")
-        return
-    name = event.args[0]
-    if name == "enable":
-        event.reply("i won't enable myself")
-        return
-    name += ".py"
-    path = os.path.join(Wd.get(), "notmod", name)
-    if not os.path.exists(path):
-        event.reply("missing %s" % name)
-        return
-    dest = os.path.join(Wd.moddir(), name)
-    shutil.move(path, dest)
-    event.ok()
-
-
-def met(event):
-    if not event.rest:
-        nmr = 0
-        for obj in find("user"):
-            event.reply("%s %s %s %s" % (
-                                         nmr,
-                                         obj.user,
-                                         obj.perms,
-                                         elapsed(time.time() - fntime(obj.__fnm__)))
-                                        )
-            nmr += 1
-        return
-    user = User()
-    user.user = event.rest
-    user.perms = ["USER"]
-    save(user)
-    event.done()
-
-
-def mod(event):
-    modstr = ",".join([x[:-3] for x in os.listdir(moddir) if not x.startswith("_")])
-    notmodstr = ",".join([x[:-3] for x in os.listdir(nmdir) if not x.startswith("_")])
-    event.reply("enabled: %s disabled: %s" % (modstr, notmodstr))
-
-
-def opr(event):
-    if not event.rest:
-        nmr = 0
-        for obj in find("user"):
-            event.reply("%s %s %s %s" % (
-                                         nmr,
-                                         obj.user,
-                                         obj.perms,
-                                         elapsed(time.time() - fntime(obj.__fnm__)))
-                                        )
-            nmr += 1
-        return
-    user = user.match("mod.irc.User", {"user": event.rest})
-    if not user:
-        user = User()
-    user.user = event.rest
-    if "OPER" not in user.perms:
-        user.perms.append("OPER")
-    write(user)
-    event.done()
-
-
-def pop(event):
-    global moddir, nmdir
-    if os.path.exists("mod"):
-        moddir = "mod"
-    if os.path.exists("notmod"):
-        nmdir = "notmod"
-    destdir = os.path.join(Wd.get(), "notmod", "")
-    cdir(destdir)
-    dirs = [moddir, nmdir]
-    nrs = 0
-    for dname in dirs:
-        if not os.path.exists(dname):
-            continue
-        for name in os.listdir(dname):
-            if not name.endswith(".py"):
-                continue
-            nrs += 1
-            path = os.path.join(dname, name)
-            dest = os.path.join(destdir, name)
-            shutil.copy(path, dest)
-    event.ok("%s %s files" % (nmdir, nrs))
-
-
-def ver(event):
-    event.reply("%s version %s" % (Cfg.name.upper(), __version__))
+            ex = evt.__exc__
+            traceback.print_exception(type(ex), ex, ex.__traceback__)
 
 
 ## runtime
 
 
 def main():
-    boot()
-    Command.add(cmd)
-    Command.add(ver)
-    scandir(Wd.moddir(), scanner, "mod")
-    if Cfg.prs.txt:
-        Command.add(cfg)
-        Command.add(dlt)
-        Command.add(dis)
-        Command.add(ena)
-        Command.add(met)
-        Command.add(mod)
-        Command.add(opr)
-        Command.add(pop)
-        cli = CLI()
-        return command(cli, Cfg.prs.otxt)
+    boot(" ".join(sys.argv[1:]))
     if Cfg.daemon:
         daemon()
         Cfg.wait = True
-    scandir(Wd.moddir(), initer, "mod")
+    if Cfg.mod:
+        scanpkg(genocide.modules, scanner, Cfg.mod)
+        scanpkg(genocide.modules, initer, Cfg.mod)
+    if Cfg.prs.txt:
+        scanpkg(genocide.modules, scanner)
+        cli = CLI()
+        return command(cli, Cfg.prs.otxt)
     if Cfg.console:
+        print("%s started at %s %s" % (
+                                       Cfg.name.upper(),
+                                       date,
+                                       printable(
+                                                 Cfg,
+                                                 skip="banner,name",
+                                                 plain=True)
+                                                )
+                                      )
         setcompleter(Command.cmd)
-        date = time.ctime(time.time()).replace("  ", " ")
-        print("%s started at %s %s" % (Cfg.name.upper(), date, printable(Cfg, skip="name", plain=True)))
         cli = Console()
-        cli.start()
+        launch(cli.start)
         Cfg.wait = True
     if Cfg.wait:
         wait()

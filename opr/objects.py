@@ -12,8 +12,8 @@ the object, is easily being updated from a on disk stored json (dict).
 
 basic usage is this:
 
->>> import genocide
->>> o = genocide.Object()
+>>> import opr
+>>> o = opr.Object()
 >>> o.key = "value"
 >>> o.key
 'value'
@@ -23,7 +23,7 @@ like get, items, keys, register, set, update and values.
 
 load/save from/to disk:
 
->>> from genocide import Object, load, save
+>>> from opr import Object, load, save
 >>> o = Object()
 >>> o.key = "value"
 >>> p = save(o)
@@ -35,10 +35,10 @@ load/save from/to disk:
 big Objects can be searched with database functions and uses read-only files
 to improve persistence and a type in filename for reconstruction:
 
->>> from genocide import Object, save
+>>> from opr import Object, save
 >>> o = Object()
 >>> save(o)  # doctest: +ELLIPSIS
-'genocide.objects.Object/...'
+'opr.objects.Object/...'
 
 great for giving objects peristence by having their state stored in files.
 

@@ -17,10 +17,10 @@ from urllib.parse import quote_plus, urlencode
 from urllib.request import Request, urlopen
 
 
-from genocide import Bus, Cfg, Class, Db, Default, Object, Repeater
-from genocide import find, fntime, last, printable, save, spl
-from genocide import edit, register, update, write
-from genocide import elapsed, launch
+from .. import Bus, Cfg, Class, Db, Default, Object, Repeater
+from .. import find, fntime, last, printable, save, spl
+from .. import edit, register, update, write
+from .. import elapsed, launch
 
 
 def __dir__():

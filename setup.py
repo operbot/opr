@@ -39,7 +39,7 @@ setup(
     long_description=read(),
     long_description_content_type="text/x-rst",
     license="Public Domain",
-    packages=["opr"],
+    packages=["opr", "opr.modules"],
     classifiers=[
         "Development Status :: 4 - Beta",
         "License :: Public Domain",
