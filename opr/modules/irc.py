@@ -37,8 +37,8 @@ def __dir__():
 __all__ = __dir__()
 
 
-NAME = "genocide"
-REALNAME = "@KarimKhanQC reconsider OTP-CR-117/19"
+NAME = "opr"
+REALNAME = "Object Programming Runtime"
 
 
 saylock = _thread.allocate_lock()
@@ -130,15 +130,17 @@ class Output(Object):
             self.cache[channel] = []
         self.cache[channel].extend(txtlist)
 
-    def get(self, channel):
+    def gettxt(self, channel):
         value = None
         try:
             value = self.cache[channel].pop(0)
-        except IndexError:
+        except (KeyError, IndexError):
             pass
         return value
 
     def oput(self, channel, txt):
+        if channel not in self.cache:
+            self.cache[channel] = []
         self.oqueue.put_nowait((channel, txt))
 
     def output(self):
@@ -149,7 +151,10 @@ class Output(Object):
             if self.dostop.is_set():
                 break
             wrapper = TextWrap()
-            txtlist = wrapper.wrap(txt)
+            try:
+                txtlist = wrapper.wrap(txt)
+            except AttributeError:
+                continue
             if len(txtlist) > 3:
                 self.extend(channel, txtlist)
                 self.dosay(channel, "%s put in cache, use !mre to show more" % len(txtlist))
@@ -567,7 +572,7 @@ def mre(event):
         event.reply("no output in %s cache." % event.channel)
         return
     for _x in range(3):
-        txt = bot.get(event.channel)
+        txt = bot.gettxt(event.channel)
         if txt:
             bot.say(event.channel, txt)
     size = bot.size(event.channel)

@@ -41,7 +41,7 @@ import opr.modules
 
 Cfg.banner = "Object Programming Runtime"
 Cfg.name = "opr"
-Cfg.version = "91"
+Cfg.version = "9"
 
 
 Wd.workdir = os.path.expanduser("~/.opr")
@@ -190,10 +190,10 @@ def main():
         daemon()
         Cfg.wait = True
     if Cfg.mod:
-        scanpkg(genocide.modules, scanner, Cfg.mod)
-        scanpkg(genocide.modules, initer, Cfg.mod)
+        scanpkg(opr.modules, scanner, Cfg.mod)
+        scanpkg(opr.modules, initer, Cfg.mod)
     if Cfg.prs.txt:
-        scanpkg(genocide.modules, scanner)
+        scanpkg(opr.modules, scanner)
         cli = CLI()
         return command(cli, Cfg.prs.otxt)
     if Cfg.console:
