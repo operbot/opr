@@ -5,7 +5,7 @@
 "object programming"
 
 
-from opr import message, handler, objects, modules, runtime, threads
+from opr import message, handler, objects, runtime, threads
 
 
 from opr.message import *

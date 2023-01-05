@@ -1,0 +1,69 @@
+#!/usr/bin/env python3
+# This file is placed in the Public Domain.
+
+
+"check for blurp"
+
+
+import os
+
+
+ALL = [
+       "__import__",
+       "__main__",
+       "__version__",
+       '"## "',
+       "popen",
+       "pkgutil",
+       "importlib",
+       "print",
+       "sys",
+       "inspect",
+       "traceback"
+      ]
+
+
+SKIP = [
+        "git",
+        "README",
+        "docs",
+        "with_traceback",
+        "test_zcmd",
+        "printable",
+        "min/check",
+        "min/tinder",
+        "fin/loop",
+        "fin/env",
+       ]
+
+
+TODO = [
+        "min",
+        "opr",
+        "opr/modules",
+        "test"
+       ] 
+
+
+TXT  = "grep -R %s %s"
+
+
+def main():
+    for txt in ALL:
+        for tdo in TODO:
+            greptxt = TXT % (txt, tdo)
+            for line in os.popen(greptxt).readlines():
+                if line.split(":")[0].endswith("~"):
+                    continue
+                lll = str(line).rstrip()
+                donext = False
+                for skip in SKIP:
+                    if skip in lll:
+                        donext = True
+                        break
+                if donext:
+                    continue
+                print(lll)
+
+
+main()

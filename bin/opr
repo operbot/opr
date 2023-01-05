@@ -26,10 +26,7 @@ import traceback
 
 
 from opr import Cfg, Command, Event, Handler, Wd
-from opr import boot, command, last, launch, printable, scanpkg, wait
-
-
-import opr.modules
+from opr import boot, command, last, launch, printable, scandir, wait
 
 
 ## defines
@@ -183,7 +180,7 @@ def wrap(func):
 def main():
     boot(" ".join(sys.argv[1:]))
     if Cfg.prs.txt:
-        scanpkg(opr.modules, scanner)
+        scandir("mod", scanner, "mod")
         cli = CLI()
         return command(cli, Cfg.prs.otxt)
     last(Cfg)
@@ -205,8 +202,8 @@ def main():
         daemon()
         Cfg.wait = True
     if Cfg.mod:
-        scanpkg(opr.modules, scanner, Cfg.mod)
-        scanpkg(opr.modules, initer, Cfg.mod)
+        scandir("mod", scanner, "mod", Cfg.mod)
+        scandir("mod", initer, "mod", Cfg.mod)
     if Cfg.wait:
         wait()
 
