@@ -12,7 +12,6 @@ import time
 
 from .objects import Object
 from .threads import launch
-from .usersdb import Users
 
 
 def __dir__():
@@ -63,25 +62,26 @@ class Callback(Object):
     cbs = Object()
     errors = []
 
-    def register(self, typ, cbs):
-        if typ not in self.cbs:
-            setattr(self.cbs, typ, cbs)
+    @staticmethod
+    def register(typ, cbs):
+        if typ not in Callback.cbs:
+            setattr(Callback.cbs, typ, cbs)
 
-    def callback(self, event):
-        func = getattr(self.cbs, event.type, None)
+    @staticmethod
+    def callback(event):
+        func = getattr(Callback.cbs, event.type, None)
         if not func:
             event.ready()
             return
-        if "perm" in dir(func):
-            if not Users.allowed(event.userhost, func.perm):
-                return
         event.__thr__ = launch(func, event)
 
+    @staicmethod
     def dispatch(self, event):
         self.callback(event)
 
-    def get(self, typ):
-        return getattr(self.cbs, typ)
+    @staticmethod
+    def get(typ):
+        return getattr(Callback.cbs, typ)
 
 
 class Command(Object):
