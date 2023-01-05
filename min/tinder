@@ -8,6 +8,7 @@
 
 import importlib
 import importlib.util
+import inspect
 import os
 import random
 import shutil
@@ -21,11 +22,14 @@ import _thread
 sys.path.insert(0, os.getcwd())
 
 
-from opr.hdl import Command, Handler, scan
-from opr.msg import Event
-from opr.obj import Object, Wd, locked, update
-from opr.run import Cfg, boot, parse, scandir
-from opr.thr import elapsed, launch, name
+from opr import Command, Handler
+from opr import Event
+from opr import Object, Wd, locked, update
+from opr import Cfg, boot, parse, scandir
+from opr import elapsed, launch, name, scanpkg
+
+
+import opr.modules
 
 
 paylock = _thread.allocate_lock()
@@ -100,15 +104,37 @@ def from_exception(ex, txt="", sep=" "):
     return res.strip()
 
 
-def importer(mname, path):
-    spec = importlib.util.find_spec(mname)
+def importer(mname, path=None):
+    if path is None:
+        spec = importlib.util.find_spec(mname)
+    else:
+        spec = importlib.util.spec_from_file_location(mname, path)
     if spec:
-        mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(mod)
-        if "init" in dir(mod):
-            launch(mod.init)
-        return mod
+        mods = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mods)
+        return mods
     return None
+
+
+def initer(mname, path=None):
+    mods = importer(mname, path)
+    if mods and "init" in dir(mods):
+        thr = launch(mods.init)
+        thr.join()
+
+
+def scan(mod):
+    for key, cmd in inspect.getmembers(mod, inspect.isfunction):
+        if key.startswith("cb"):
+            continue
+        names = cmd.__code__.co_varnames
+        if "event" in names:
+            Command.add(cmd)
+
+
+def scanner(mname, path=None):
+    mods = importer(mname, path)
+    scan(mods)
 
 
 @locked(paylock)
@@ -148,8 +174,8 @@ def wrap(func):
 def main():
     if os.path.exists(Cfg.workdir):
         shutil.rmtree(Cfg.workdir)
-    boot()
-    scandir("mod", importer, "mod")
+    boot(" ".join(sys.argv[1:]))
+    scanpkg(opr.modules, scanner)
     cli = CLI()
     nrs = Cfg.prs.index or 1
     starttime = time.time()

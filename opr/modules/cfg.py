@@ -10,12 +10,13 @@ from opr import Cfg, edit, keys, last, printable, write
 
 def __dir__():
     return (
+            "cfg",
             "dis",
             "ena",
-            "krn"
            )
 
-def krn(event):
+
+def cfg(event):
     last(Cfg)
     if not event.sets:
         event.reply(printable(

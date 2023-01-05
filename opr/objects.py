@@ -367,15 +367,14 @@ class Db:
             return res[-1]
         return None
 
+
 def fnclass(path):
-    pth = []
     try:
         _rest, *pth = path.split("store")
+        splitted = pth[0].split(os.sep)
+        return splitted[1]
     except ValueError:
         pass
-    if not pth:
-        pth = path.split(os.sep)
-    return pth[0]
 
 
 def fns(otp, timed=None):
@@ -404,6 +403,7 @@ def fns(otp, timed=None):
                         continue
                     res.append(path2)
     return sorted(res, key=lambda x: fntime(x))
+
 
 def fntime(daystr):
     daystr = daystr.replace("_", ":")

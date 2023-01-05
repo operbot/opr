@@ -5,13 +5,14 @@
 "object programming"
 
 
-from opr import message, handler, objects, runtime, threads, usersdb
+from opr import message, handler, objects, modules, runtime, threads
+
+
 from opr.message import *
 from opr.handler import *
 from opr.objects import *
 from opr.runtime import *
 from opr.threads import *
-from opr.usersdb import *
 
 
 def __dir__():
@@ -34,8 +35,6 @@ def __dir__():
             'Repeater',
             'Thread',
             'Timer',
-            'User',
-            'Users',
             'Wd',
             'boot',
             'cdir',
@@ -59,6 +58,7 @@ def __dir__():
             'loads',
             'locked',
             'match',
+            'modules',
             'name',
             'parse',
             'printable',

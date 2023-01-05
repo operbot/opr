@@ -9,7 +9,7 @@ import threading
 import time
 
 
-from .objects import Default, register
+from .objects import Class, Default, register
 from .handler import Bus
 from .threads import elapsed
 
@@ -73,6 +73,9 @@ class Parsed(Default):
             self.txt = self.cmd
 
 
+Class.add(Parsed)
+
+
 class Event(Parsed):
 
 
@@ -114,3 +117,6 @@ class Event(Parsed):
         if self.__thr__:
             self.__thr__.join()
         self.__ready__.wait()
+
+
+Class.add(Event)

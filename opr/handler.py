@@ -75,9 +75,9 @@ class Callback(Object):
             return
         event.__thr__ = launch(func, event)
 
-    @staicmethod
-    def dispatch(self, event):
-        self.callback(event)
+    @staticmethod
+    def dispatch(event):
+        Callback.callback(event)
 
     @staticmethod
     def get(typ):
@@ -137,7 +137,7 @@ class Handler(Callback):
         self.raw(txt)
 
     def handle(self, event):
-        self.dispatch(event)
+        Callback.dispatch(event)
 
     def loop(self):
         while not self.stopped.set():

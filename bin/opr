@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 # This file is placed in the Public Domain.
-# pylint: disable=C0103,C0115,C0116,C0413,W0212,C0301,W0613,E0611,E0401
+# pylint: disable=C0103,C0115,C0116,C0413,W0212,C0301,W0613,E0611,E0401,R1710
 
 
 "Object Programming Runtime"
 
 
 ## imports
+
+
+import os, sys ; sys.path.insert(0, os.getcwd())
 
 
 import atexit
@@ -17,22 +20,16 @@ import os
 import readline
 import rlcompleter
 import sys
-import shutil
 import time
 import termios
 import traceback
 
 
-sys.path.insert(0, os.getcwd())
+from opr import Cfg, Command, Event, Handler, Wd
+from opr import boot, command, last, launch, printable, scanpkg, wait
 
 
-from opr import Cfg, Command, Event, Handler, User, Wd
-from opr import Wd, cdir, edit, find, keys, last, printable, save, write
-from opr import elapsed, fntime, launch, match
-from opr import boot, command, scandir, scanpkg, wait
-
-
-import opr
+import opr.modules
 
 
 ## defines
@@ -185,23 +182,18 @@ def wrap(func):
 
 def main():
     boot(" ".join(sys.argv[1:]))
-    if Cfg.daemon:
-        daemon()
-        Cfg.wait = True
-    if Cfg.mod:
-        scandir("mod", scanner, Cfg.mod, "mod")
-        scandir("mod", initer, Cfg.mod)
     if Cfg.prs.txt:
-        scandir("mod", scanner)
+        scanpkg(opr.modules, scanner)
         cli = CLI()
         return command(cli, Cfg.prs.otxt)
+    last(Cfg)
     if Cfg.console:
         print("%s started at %s %s" % (
                                        Cfg.name.upper(),
                                        date,
                                        printable(
                                                  Cfg,
-                                                 skip="banner,name",
+                                                 skip="banner,name,prs",
                                                  plain=True)
                                                 )
                                       )
@@ -209,6 +201,12 @@ def main():
         cli = Console()
         launch(cli.start)
         Cfg.wait = True
+    if Cfg.daemon:
+        daemon()
+        Cfg.wait = True
+    if Cfg.mod:
+        scanpkg(opr.modules, scanner, Cfg.mod)
+        scanpkg(opr.modules, initer, Cfg.mod)
     if Cfg.wait:
         wait()
 

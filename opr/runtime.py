@@ -10,7 +10,7 @@ import time
 
 
 from .message import Event, Parsed
-from .objects import Default, spl, update
+from .objects import Class, Default, spl, update
 
 
 def __dir__():
@@ -29,6 +29,9 @@ def __dir__():
 class Config(Default):
 
     pass
+
+
+Class.add(Config)
 
 
 def boot(txt):
