@@ -1,4 +1,4 @@
-# This file is placed in the Public Domain.
+# This is placed in the Public Domain.
 
 
-"modular"
+"modules"
