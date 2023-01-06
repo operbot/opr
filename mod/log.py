@@ -43,4 +43,4 @@ def log(event):
     obj = Log()
     obj.txt = event.rest
     save(obj)
-    event.done()
+    event.ok()

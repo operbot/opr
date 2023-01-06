@@ -239,7 +239,7 @@ def dpl(event):
         if feed:
             edit(feed, setter)
             save(feed)
-            event.done()
+            event.ok()
 
 
 def ftc(event):
@@ -266,7 +266,7 @@ def nme(event):
         got.append(feed)
     for feed in got:
         save(feed)
-    event.done()
+    event.ok()
 
 
 def rem(event):
@@ -277,7 +277,7 @@ def rem(event):
     for feed in find("rss", selector):
         feed.__deleted__ = True
         save(feed)
-    event.done()
+    event.ok()
 
 
 def rss(event):
@@ -305,4 +305,4 @@ def rss(event):
     feed = Rss()
     feed.rss = event.args[0]
     save(feed)
-    event.done()
+    event.ok()

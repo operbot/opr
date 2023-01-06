@@ -375,6 +375,7 @@ def fnclass(path):
         return splitted[1]
     except ValueError:
         pass
+    return None
 
 
 def fns(otp, timed=None):

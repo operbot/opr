@@ -43,4 +43,4 @@ def tdo(event):
     obj = Todo()
     obj.txt = event.rest
     save(obj)
-    event.done()
+    event.ok()

@@ -22,14 +22,9 @@ import _thread
 sys.path.insert(0, os.getcwd())
 
 
-from opr import Command, Handler
-from opr import Event
-from opr import Object, Wd, locked, update
-from opr import Cfg, boot, parse, scandir
+from opr import Cfg, Command, Event, Handler, Object, Wd
+from opr import boot, locked, parse, scandir, update
 from opr import elapsed, launch, name, scanpkg
-
-
-import opr.modules
 
 
 paylock = _thread.allocate_lock()
@@ -43,6 +38,9 @@ Wd.workdir = ".test"
 errors = []
 events = []
 results = []
+
+
+SKIP = ["debug",]
 
 
 param = Object()
@@ -94,6 +92,13 @@ def consume(evts):
         except ValueError:
             continue
     return res
+
+
+def doskip(txt):
+    for skp in SKIP:
+        if skp in txt:
+           return True
+    return False
 
 
 def from_exception(ex, txt="", sep=" "):
@@ -154,10 +159,6 @@ def payload(clt):
     return nmr
 
 
-def print_exc(ex):
-    traceback.print_exception(type(ex), ex, ex.__traceback__)
-
-
 def wrap(func):
     fds = sys.stdin.fileno()
     old = termios.tcgetattr(fds)
@@ -168,14 +169,17 @@ def wrap(func):
     finally:
         termios.tcsetattr(fds, termios.TCSADRAIN, old)
         for evt in Command.errors:
-            print_exc(evt.__exc__)
+            ex = evt.__exc__
+            if doskip(str(ex)):
+                continue
+            traceback.print_exception(type(ex), ex, ex.__traceback__)
 
 
 def main():
     if os.path.exists(Cfg.workdir):
         shutil.rmtree(Cfg.workdir)
     boot(" ".join(sys.argv[1:]))
-    scanpkg(opr.modules, scanner)
+    scandir("mod", scanner, "mod")
     cli = CLI()
     nrs = Cfg.prs.index or 1
     starttime = time.time()

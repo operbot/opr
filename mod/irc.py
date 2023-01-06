@@ -624,7 +624,7 @@ def icfg(event):
     else:
         edit(config, event.sets)
         save(config)
-        event.done()
+        event.ok()
 
 
 def dlt(event):
@@ -635,7 +635,7 @@ def dlt(event):
     for obj in find("user", selector):
         obj.__deleted__ = True
         save(obj)
-        event.done()
+        event.ok()
         break
 
 

@@ -27,7 +27,6 @@ def __dir__():
             'Default',
             'Event',
             'Handler',
-            'NoUser',
             'Object',
             'ObjectDecoder',
             'ObjectEncoder',
@@ -58,7 +57,6 @@ def __dir__():
             'loads',
             'locked',
             'match',
-            'modules',
             'name',
             'parse',
             'printable',
@@ -75,8 +73,7 @@ def __dir__():
             'handler',
             'objects',
             'runtime',
-            'threads',
-            'usersdb'
+            'threads'
            )
 
 
