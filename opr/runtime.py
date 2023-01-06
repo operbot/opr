@@ -5,11 +5,13 @@
 "runtime"
 
 
+import inspect
 import os
 import time
 
 
 from .message import Event, Parsed
+from .handler import Command
 from .objects import Class, Default, spl, update
 
 
@@ -82,6 +84,15 @@ def parse(txt):
     prs.parse(txt)
     update(Cfg.prs, prs)
     return prs
+
+
+def scan(mod):
+    for key, cmd in inspect.getmembers(mod, inspect.isfunction):
+        if key.startswith("cb"):
+            continue
+        names = cmd.__code__.co_varnames
+        if "event" in names:
+            Command.add(cmd)
 
 
 def scanpkg(pkg, importer, mods=None):
