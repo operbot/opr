@@ -8,7 +8,7 @@
 import unittest
 
 
-from opr.hdl import Handler
+from opr.handler import Handler
 
 
 class TestHandler(unittest.TestCase):

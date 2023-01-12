@@ -33,7 +33,6 @@ from opr import boot, command, last, launch, printable, scan, scandir, wait
 
 
 Cfg.banner = "Object Programming Runtime"
-Cfg.mod = "irc,rss,sts,cmd"
 Cfg.name = "opr"
 Cfg.version = "9"
 
