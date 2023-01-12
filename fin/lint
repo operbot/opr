@@ -27,6 +27,7 @@ def loop(path, txt):
             continue
         if not os.path.exists("%s/__init__.py" % fnn):
             continue
+        print("linting %s" % fnn)
         os.chdir(fnn)
         for line in os.popen(txt).readlines():
             if doskip(line):
