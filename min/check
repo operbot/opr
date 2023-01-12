@@ -39,7 +39,7 @@ SKIP = [
 TODO = [
         "min",
         "opr",
-        "opr/modules",
+        "mod",
         "test"
        ] 
 

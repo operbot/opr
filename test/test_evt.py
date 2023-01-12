@@ -8,7 +8,7 @@
 import unittest
 
 
-from opr.message import Event
+from opr.msg import Event
 
 
 class TestEvent(unittest.TestCase):

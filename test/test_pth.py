@@ -8,7 +8,7 @@
 import unittest
 
 
-from opr.objects import fntime
+from opr.obj import fntime
 
 
 FN = "opr.handler.Event/2d390009cef944e68ce686e5709a54d7/2022-04-11/22:40:31.259218"
